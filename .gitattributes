@@ -1,0 +1,50 @@
+# ============================================================
+# CHDman Batch UI — .gitattributes
+# Fins de ligne normalisees par type de fichier (voir ROADMAP.md,
+# Phase 2 : CRLF pour les scripts Windows .bat, LF pour les
+# scripts Linux/macOS .sh)
+# ============================================================
+ 
+# Comportement par defaut : normaliser en LF dans le depot,
+# checkout selon le mode "text=auto" standard de Git.
+* text=auto eol=lf
+ 
+# --- Scripts Windows : CRLF obligatoire ---
+# cmd.exe interprete correctement un .bat avec des fins de ligne
+# CRLF ; un .bat en LF pur peut afficher des artefacts ou, sur
+# certaines versions de cmd.exe, se comporter de facon erratique
+# sur les blocs entre parentheses (if/else multi-lignes).
+*.bat text eol=crlf
+ 
+# --- Scripts Linux / macOS : LF obligatoire ---
+# Un script bash avec des CRLF echoue au parsing du shebang
+# ("/usr/bin/env bash^M": No such file or directory) et casse
+# les comparaisons de chaines dans tout le script.
+*.sh text eol=lf
+ 
+# --- Fichiers de langue i18n : LF, encodage preserve tel quel ---
+# Le BOM UTF-8 en tete de chaque .lang doit rester intact (voir
+# MEMOIRE.md Entree 8) ; -diff evite que Git tente un diff texte
+# peu lisible sur ces fichiers a BOM.
+*.lang text eol=lf
+ 
+# --- Fichiers de configuration texte generes au runtime ---
+*.cfg text eol=lf
+ 
+# --- Documentation ---
+*.md text eol=lf
+LICENSE text eol=lf
+CHANGELOG.md text eol=lf
+README.md text eol=lf
+VERSION text eol=lf
+ 
+# --- Binaires : jamais de conversion de fin de ligne ---
+# Necessaire y compris pour chdman.exe (deja couvert par le
+# comportement binaire par defaut de Git sur les .exe, regle
+# explicite ici pour la clarte et la robustesse inter-plateforme).
+*.exe binary
+bin/linux/* binary
+bin/macos/* binary
+*.chd binary
+*.zip binary
+*.7z binary
