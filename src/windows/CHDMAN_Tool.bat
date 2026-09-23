@@ -509,8 +509,10 @@ echo %OUTPUT_FORMAT_PROMPT%
 echo   %OUTPUT_FORMAT_CUEBIN%
 echo   %OUTPUT_FORMAT_GDI%
 echo   %OUTPUT_FORMAT_ISO%
+echo   %OUTPUT_FORMAT_RAW%
 set /p "ETYPE=%OUTPUT_FORMAT_CHOICE% "
 
+set "EXTRA_ARGS="
 if "%ETYPE%"=="1" (
     set "SUBCMD=extractcd"
     set "OUT=!SRC_DIR!!SRC_NAME!.cue"
@@ -523,17 +525,25 @@ if "%ETYPE%"=="3" (
     set "SUBCMD=extractdvd"
     set "OUT=!SRC_DIR!!SRC_NAME!.iso"
 )
+if "%ETYPE%"=="4" (
+    set "SUBCMD=extractraw"
+    set "OUT=!SRC_DIR!!SRC_NAME!.raw"
+    set "EXUNITSIZE="
+    set /p "EXUNITSIZE=%PROMPT_UNITSIZE_EXTRACT% "
+    if not defined EXUNITSIZE set "EXUNITSIZE=2048"
+    set "EXTRA_ARGS=--unitsize !EXUNITSIZE!"
+)
 
 call :CONFIRM_OVERWRITE "!OUT!"
 if "%CONFIRM_RESULT%"=="0" goto MENU
 
 echo.
 echo ------------------------------------------------------------
-echo  %COMMAND_LABEL% "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
+echo  %COMMAND_LABEL% "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!" !EXTRA_ARGS!
 echo ------------------------------------------------------------
 echo.
 
-"%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
+"%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!" !EXTRA_ARGS!
 
 echo.
 if exist "!OUT!" (
@@ -575,6 +585,7 @@ echo %BATCH_OUTPUT_FORMAT_PROMPT%
 echo   %OUTPUT_FORMAT_CUEBIN%
 echo   %OUTPUT_FORMAT_GDI%
 echo   %OUTPUT_FORMAT_ISO%
+echo   %OUTPUT_FORMAT_RAW%
 set /p "ETYPE=%OUTPUT_FORMAT_CHOICE% "
 
 REM Compte, sans rien executer, le nombre de fichiers de sortie qui
@@ -586,6 +597,13 @@ REM le fait DO_EXTRACT pour le sous-titre "extractcd").
 set "OUTEXT=cue"
 if "%ETYPE%"=="2" set "OUTEXT=gdi"
 if "%ETYPE%"=="3" set "OUTEXT=iso"
+if "%ETYPE%"=="4" set "OUTEXT=raw"
+
+set "BATCH_UNITSIZE="
+if "%ETYPE%"=="4" (
+    set /p "BATCH_UNITSIZE=%PROMPT_UNITSIZE_EXTRACT% "
+    if not defined BATCH_UNITSIZE set "BATCH_UNITSIZE=2048"
+)
 
 set "EXIST_COUNT=0"
 pushd "%SRC_ROOT%"
@@ -614,7 +632,7 @@ set "COUNT=0"
 set "FAIL=0"
 
 pushd "%SRC_ROOT%"
-for /R %%i in (*.chd) do call :DO_EXTRACT "%%i" "%ETYPE%"
+for /R %%i in (*.chd) do call :DO_EXTRACT "%%i" "%ETYPE%" "%BATCH_UNITSIZE%"
 popd
 
 echo.
@@ -631,10 +649,12 @@ exit /b
 :DO_EXTRACT
 set "F=%~1"
 set "ETYPE2=%~2"
+set "BATCH_UNITSIZE2=%~3"
 set "FDIR=%~dp1"
 set "FNAME=%~n1"
 pushd "%FDIR%"
 
+set "EXTRA_ARGS="
 if "%ETYPE2%"=="1" (
     set "SUBCMD=extractcd"
     set "OUT=%FDIR%%FNAME%.cue"
@@ -647,10 +667,15 @@ if "%ETYPE2%"=="3" (
     set "SUBCMD=extractdvd"
     set "OUT=%FDIR%%FNAME%.iso"
 )
+if "%ETYPE2%"=="4" (
+    set "SUBCMD=extractraw"
+    set "OUT=%FDIR%%FNAME%.raw"
+    set "EXTRA_ARGS=--unitsize %BATCH_UNITSIZE2%"
+)
 
 echo.
 echo %BATCH_EXTRACT_LABEL% %F%
-"%CHDMAN%" !SUBCMD! --force --input "%F%" --output "!OUT!"
+"%CHDMAN%" !SUBCMD! --force --input "%F%" --output "!OUT!" !EXTRA_ARGS!
 if exist "!OUT!" (
     set /a COUNT+=1
     call :LOG_COMMAND "!SUBCMD!" "%F%" "!OUT!" "OK"
@@ -759,24 +784,43 @@ for %%F in ("%SRC%") do (
 
 set "OUT=!SRC_DIR!!SRC_NAME!.chd"
 
+echo.
+echo %HD_TYPE_PROMPT%
+echo   %HD_TYPE_HD%
+echo   %HD_TYPE_RAW%
+set /p "HDTYPE=%HD_TYPE_CHOICE% "
+
+set "HDSUBCMD=createhd"
+set "HDEXTRA="
+if "%HDTYPE%"=="2" (
+    set "HDSUBCMD=createraw"
+    set "HDHUNKSIZE="
+    set /p "HDHUNKSIZE=%PROMPT_HUNKSIZE% "
+    if not defined HDHUNKSIZE set "HDHUNKSIZE=2048"
+    set "HDUNITSIZE="
+    set /p "HDUNITSIZE=%PROMPT_UNITSIZE% "
+    if not defined HDUNITSIZE set "HDUNITSIZE=2048"
+    set "HDEXTRA=--hunksize !HDHUNKSIZE! --unitsize !HDUNITSIZE!"
+)
+
 call :CONFIRM_OVERWRITE "!OUT!"
 if "%CONFIRM_RESULT%"=="0" goto MENU
 
 echo.
 echo ------------------------------------------------------------
-echo  %COMMAND_LABEL% "%CHDMAN%" createhd --force --input "%SRC%" --output "!OUT!"
+echo  %COMMAND_LABEL% "%CHDMAN%" !HDSUBCMD! --force --input "%SRC%" --output "!OUT!" !HDEXTRA!
 echo ------------------------------------------------------------
 echo.
 
-"%CHDMAN%" createhd --force --input "%SRC%" --output "!OUT!"
+"%CHDMAN%" !HDSUBCMD! --force --input "%SRC%" --output "!OUT!" !HDEXTRA!
 
 echo.
 if exist "!OUT!" (
     echo %CREATE_OK% !OUT!
-    call :LOG_COMMAND "createhd" "%SRC%" "!OUT!" "OK"
+    call :LOG_COMMAND "!HDSUBCMD!" "%SRC%" "!OUT!" "OK"
 ) else (
     echo %CREATE_FAILED%
-    call :LOG_COMMAND "createhd" "%SRC%" "!OUT!" "FAILED"
+    call :LOG_COMMAND "!HDSUBCMD!" "%SRC%" "!OUT!" "FAILED"
 )
 echo.
 pause

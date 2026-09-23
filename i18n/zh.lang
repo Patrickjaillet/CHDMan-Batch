@@ -72,7 +72,9 @@ OUTPUT_FORMAT_PROMPT=输出格式：
 OUTPUT_FORMAT_CUEBIN=[1] CUE + BIN  (CD - PSX、Saturn、世嘉CD...)
 OUTPUT_FORMAT_GDI=[2] GDI        (Dreamcast)
 OUTPUT_FORMAT_ISO=[3] ISO        (DVD)
-OUTPUT_FORMAT_CHOICE=选择 (1-3)：
+OUTPUT_FORMAT_RAW=[4] 原始／通用 (extractraw - 需要 unit 大小)
+PROMPT_UNITSIZE_EXTRACT=unit 大小（字节，默认 2048）：
+OUTPUT_FORMAT_CHOICE=选择 (1-4)：
 EXTRACT_OK=[OK] 提取完成：
 EXTRACT_FAILED=[警告] 提取似乎已失败。
 
@@ -91,6 +93,13 @@ INFO_TITLE=CHD 信息
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=压缩硬盘镜像
 
+; ==== 7) 创建硬盘／原始格式 ====
+HD_TYPE_PROMPT=镜像类型：
+HD_TYPE_HD=[1] 硬盘镜像 (createhd)
+HD_TYPE_RAW=[2] 原始／通用镜像 (createraw - 需要 hunk／unit 大小)
+HD_TYPE_CHOICE=选择 (1-2)：
+PROMPT_HUNKSIZE=hunk 大小（字节，默认 2048）：
+PROMPT_UNITSIZE=unit 大小（字节，默认 2048）：
 ; ==== 覆盖确认 ====
 OVERWRITE_PROMPT=以下输出文件已存在：
 OVERWRITE_CONFIRM=要覆盖吗？ (y/N)：

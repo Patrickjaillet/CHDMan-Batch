@@ -72,7 +72,9 @@ OUTPUT_FORMAT_PROMPT=Formato de salida:
 OUTPUT_FORMAT_CUEBIN=[1] CUE + BIN  (CD - PSX, Saturn, SegaCD...)
 OUTPUT_FORMAT_GDI=[2] GDI        (Dreamcast)
 OUTPUT_FORMAT_ISO=[3] ISO        (DVD)
-OUTPUT_FORMAT_CHOICE=Opcion (1-3):
+OUTPUT_FORMAT_RAW=[4] Bruto / generico (extractraw - requiere tamano de unidad)
+PROMPT_UNITSIZE_EXTRACT=Tamano de unidad en bytes (por defecto 2048):
+OUTPUT_FORMAT_CHOICE=Opcion (1-4):
 EXTRACT_OK=[OK] Extraccion completada:
 EXTRACT_FAILED=[ATENCION] La extraccion parece haber fallado.
 
@@ -91,6 +93,13 @@ INFO_TITLE=INFORMACION DE UN CHD
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=COMPRIMIR UNA IMAGEN DE DISCO DURO
 
+; ==== 7) Crear disco duro / bruto ====
+HD_TYPE_PROMPT=Tipo de imagen:
+HD_TYPE_HD=[1] Imagen de disco duro (createhd)
+HD_TYPE_RAW=[2] Imagen bruta / generica (createraw - requiere tamano de hunk/unidad)
+HD_TYPE_CHOICE=Opcion (1-2):
+PROMPT_HUNKSIZE=Tamano de hunk en bytes (por defecto 2048):
+PROMPT_UNITSIZE=Tamano de unidad en bytes (por defecto 2048):
 ; ==== Confirmacion de sobrescritura ====
 OVERWRITE_PROMPT=El siguiente archivo de salida ya existe:
 OVERWRITE_CONFIRM=Sobrescribirlo? (s/N):

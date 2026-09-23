@@ -72,7 +72,9 @@ OUTPUT_FORMAT_PROMPT=出力形式:
 OUTPUT_FORMAT_CUEBIN=[1] CUE + BIN  (CD - PSX, サターン, セガCD...)
 OUTPUT_FORMAT_GDI=[2] GDI        (ドリームキャスト)
 OUTPUT_FORMAT_ISO=[3] ISO        (DVD)
-OUTPUT_FORMAT_CHOICE=選択 (1-3):
+OUTPUT_FORMAT_RAW=[4] raw／汎用 (extractraw - unitサイズが必要)
+PROMPT_UNITSIZE_EXTRACT=unitサイズ（バイト、デフォルト2048）：
+OUTPUT_FORMAT_CHOICE=選択 (1-4):
 EXTRACT_OK=[OK] 抽出が完了しました:
 EXTRACT_FAILED=[警告] 抽出に失敗した可能性があります。
 
@@ -91,6 +93,13 @@ INFO_TITLE=CHD の情報
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=ハードディスクイメージを圧縮
 
+; ==== 7) ハードディスク／raw作成 ====
+HD_TYPE_PROMPT=イメージ種別：
+HD_TYPE_HD=[1] ハードディスクイメージ (createhd)
+HD_TYPE_RAW=[2] raw／汎用イメージ (createraw - hunk／unitサイズが必要)
+HD_TYPE_CHOICE=選択 (1-2)：
+PROMPT_HUNKSIZE=hunkサイズ（バイト、デフォルト2048）：
+PROMPT_UNITSIZE=unitサイズ（バイト、デフォルト2048）：
 ; ==== 上書き確認 ====
 OVERWRITE_PROMPT=以下の出力ファイルは既に存在します：
 OVERWRITE_CONFIRM=上書きしますか？ (y/N)：

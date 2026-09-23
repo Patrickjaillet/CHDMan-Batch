@@ -664,7 +664,8 @@ create_batch() {
 # 3) EXTRACTION - UN SEUL FICHIER
 # ============================================================
 extract_single() {
-    local src src_dir src_name etype subcmd out
+    local src src_dir src_name etype subcmd out hunksize unitsize
+    local -a extra_args
 
     clear
     echo "============================================================"
@@ -693,12 +694,21 @@ extract_single() {
     echo "  ${OUTPUT_FORMAT_CUEBIN}"
     echo "  ${OUTPUT_FORMAT_GDI}"
     echo "  ${OUTPUT_FORMAT_ISO}"
+    echo "  ${OUTPUT_FORMAT_RAW}"
     read -r -p "${OUTPUT_FORMAT_CHOICE} " etype
 
+    extra_args=()
     case "${etype}" in
         1) subcmd="extractcd"; out="${src_dir}${src_name}.cue" ;;
         2) subcmd="extractcd"; out="${src_dir}${src_name}.gdi" ;;
         3) subcmd="extractdvd"; out="${src_dir}${src_name}.iso" ;;
+        4)
+            subcmd="extractraw"
+            out="${src_dir}${src_name}.raw"
+            read -r -p "${PROMPT_UNITSIZE_EXTRACT} " unitsize
+            [ -z "${unitsize}" ] && unitsize="2048"
+            extra_args=(--unitsize "${unitsize}")
+            ;;
         *) subcmd="extractcd"; out="${src_dir}${src_name}.cue" ;;
     esac
 
@@ -706,11 +716,11 @@ extract_single() {
 
     echo ""
     echo "------------------------------------------------------------"
-    echo " ${COMMAND_LABEL} \"${CHDMAN}\" ${subcmd} --force --input \"${src}\" --output \"${out}\""
+    echo " ${COMMAND_LABEL} \"${CHDMAN}\" ${subcmd} --force --input \"${src}\" --output \"${out}\" ${extra_args[*]}"
     echo "------------------------------------------------------------"
     echo ""
 
-    "${CHDMAN}" "${subcmd}" --force --input "${src}" --output "${out}" || true
+    "${CHDMAN}" "${subcmd}" --force --input "${src}" --output "${out}" "${extra_args[@]}" || true
 
     echo ""
     if [ -f "${out}" ]; then
@@ -728,22 +738,29 @@ extract_single() {
 # 4) EXTRACTION - EN LOT
 # ============================================================
 do_extract() {
-    local f="$1" etype2="$2" f_dir f_name subcmd out
+    local f="$1" etype2="$2" batch_unitsize="$3" f_dir f_name subcmd out
+    local -a extra_args
 
     f_dir="$(cd "$(dirname "${f}")" >/dev/null 2>&1 && pwd)/"
     f_name="$(basename "${f}")"
     f_name="${f_name%.*}"
 
+    extra_args=()
     case "${etype2}" in
         1) subcmd="extractcd"; out="${f_dir}${f_name}.cue" ;;
         2) subcmd="extractcd"; out="${f_dir}${f_name}.gdi" ;;
         3) subcmd="extractdvd"; out="${f_dir}${f_name}.iso" ;;
+        4)
+            subcmd="extractraw"
+            out="${f_dir}${f_name}.raw"
+            extra_args=(--unitsize "${batch_unitsize}")
+            ;;
         *) subcmd="extractcd"; out="${f_dir}${f_name}.cue" ;;
     esac
 
     echo ""
     echo "${BATCH_EXTRACT_LABEL} ${f}"
-    if "${CHDMAN}" "${subcmd}" --force --input "${f}" --output "${out}"; then :; fi
+    if "${CHDMAN}" "${subcmd}" --force --input "${f}" --output "${out}" "${extra_args[@]}"; then :; fi
     if [ -f "${out}" ]; then
         BATCH_COUNT=$((BATCH_COUNT + 1))
         log_command "${subcmd}" "${f}" "${out}" "OK"
@@ -754,7 +771,7 @@ do_extract() {
 }
 
 extract_batch() {
-    local src_root etype f
+    local src_root etype f batch_unitsize
 
     clear
     echo "============================================================"
@@ -779,7 +796,14 @@ extract_batch() {
     echo "  ${OUTPUT_FORMAT_CUEBIN}"
     echo "  ${OUTPUT_FORMAT_GDI}"
     echo "  ${OUTPUT_FORMAT_ISO}"
+    echo "  ${OUTPUT_FORMAT_RAW}"
     read -r -p "${OUTPUT_FORMAT_CHOICE} " etype
+
+    batch_unitsize=""
+    if [ "${etype}" = "4" ]; then
+        read -r -p "${PROMPT_UNITSIZE_EXTRACT} " batch_unitsize
+        [ -z "${batch_unitsize}" ] && batch_unitsize="2048"
+    fi
 
     # Compte, sans rien executer, le nombre de fichiers de sortie qui
     # existent deja et seraient ecrases (voir la note equivalente dans
@@ -789,6 +813,7 @@ extract_batch() {
         1) out_ext="cue" ;;
         2) out_ext="gdi" ;;
         3) out_ext="iso" ;;
+        4) out_ext="raw" ;;
         *) out_ext="cue" ;;
     esac
     while IFS= read -r -d '' f; do
@@ -818,7 +843,7 @@ extract_batch() {
 
     # Substitution de processus : voir la note dans create_batch()
     # ci-dessus au sujet des compteurs perdus dans un sous-shell.
-    while IFS= read -r -d '' f; do do_extract "${f}" "${etype}"; done \
+    while IFS= read -r -d '' f; do do_extract "${f}" "${etype}" "${batch_unitsize}"; done \
         < <(find "${src_root}" -type f -iname "*.chd" -print0)
 
     echo ""
@@ -904,7 +929,8 @@ info_chd() {
 # 7) DISQUE DUR (createhd)
 # ============================================================
 create_hd() {
-    local src src_dir src_name out
+    local src src_dir src_name out hdtype subcmd hunksize unitsize
+    local -a extra_args
 
     clear
     echo "============================================================"
@@ -929,23 +955,41 @@ create_hd() {
     src_name="${src_name%.*}"
     out="${src_dir}${src_name}.chd"
 
+    echo ""
+    echo "${HD_TYPE_PROMPT}"
+    echo "  ${HD_TYPE_HD}"
+    echo "  ${HD_TYPE_RAW}"
+    read -r -p "${HD_TYPE_CHOICE} " hdtype
+
+    extra_args=()
+    if [ "${hdtype}" = "2" ]; then
+        subcmd="createraw"
+        read -r -p "${PROMPT_HUNKSIZE} " hunksize
+        read -r -p "${PROMPT_UNITSIZE} " unitsize
+        [ -z "${hunksize}" ] && hunksize="2048"
+        [ -z "${unitsize}" ] && unitsize="2048"
+        extra_args=(--hunksize "${hunksize}" --unitsize "${unitsize}")
+    else
+        subcmd="createhd"
+    fi
+
     confirm_overwrite "${out}" || return
 
     echo ""
     echo "------------------------------------------------------------"
-    echo " ${COMMAND_LABEL} \"${CHDMAN}\" createhd --force --input \"${src}\" --output \"${out}\""
+    echo " ${COMMAND_LABEL} \"${CHDMAN}\" ${subcmd} --force --input \"${src}\" --output \"${out}\" ${extra_args[*]}"
     echo "------------------------------------------------------------"
     echo ""
 
-    "${CHDMAN}" createhd --force --input "${src}" --output "${out}" || true
+    "${CHDMAN}" "${subcmd}" --force --input "${src}" --output "${out}" "${extra_args[@]}" || true
 
     echo ""
     if [ -f "${out}" ]; then
         echo "${CREATE_OK} ${out}"
-        log_command "createhd" "${src}" "${out}" "OK"
+        log_command "${subcmd}" "${src}" "${out}" "OK"
     else
         echo "${CREATE_FAILED}"
-        log_command "createhd" "${src}" "${out}" "FAILED"
+        log_command "${subcmd}" "${src}" "${out}" "FAILED"
     fi
     echo ""
     read -r -p "" _
