@@ -18,6 +18,24 @@ set "CONFIG_FILE=%SCRIPT_DIR%chdman-tool.local.cfg"
 set "DEFAULT_LANG=en"
 
 REM ============================================================
+REM  Journal d'execution : un fichier par lancement du script,
+REM  horodate dans son nom, cree a cote du script (portable).
+REM  PowerShell (present par defaut sur Windows 10 et 11) fournit
+REM  un horodatage au format fixe AAAAMMJJ_hhmmss, independant
+REM  des parametres regionaux de l'utilisateur (contrairement a
+REM  %DATE%/%TIME%, dont le format varie selon la locale Windows
+REM  active). "wmic", plus ancien, est deconseille depuis
+REM  Windows 10 21H1 et retire par defaut sur les builds
+REM  recentes de Windows 11.
+REM ============================================================
+set "LOGSTAMP="
+for /f "usebackq delims=" %%a in (`powershell -NoProfile -Command "Get-Date -Format 'yyyyMMdd_HHmmss'" 2^>nul`) do (
+    if not defined LOGSTAMP set "LOGSTAMP=%%a"
+)
+if not defined LOGSTAMP set "LOGSTAMP=unknown"
+set "LOG_FILE=%SCRIPT_DIR%chdman-tool_%LOGSTAMP%.log"
+
+REM ============================================================
 REM  Verifie que chdman.exe est present a cote du script
 REM  (message affiche en anglais : aucun fichier de langue
 REM  n'est encore garanti charge a ce stade)
@@ -187,6 +205,30 @@ pause
 exit /b 0
 
 REM ============================================================
+REM  LOG_COMMAND - consigne une commande chdman executee et son
+REM  resultat dans le journal d'execution (%LOG_FILE%). Le
+REM  fichier n'est cree qu'au premier appel (aucun fichier
+REM  residuel si le script est lance puis quitte sans effectuer
+REM  d'operation). Arguments :
+REM   %1 sous-commande chdman (createcd, verify, ...)
+REM   %2 chemin d'entree
+REM   %3 chemin de sortie (peut etre "" pour verify/info)
+REM   %4 resultat ("OK" ou "FAILED")
+REM ============================================================
+:LOG_COMMAND
+if not exist "%LOG_FILE%" (
+    echo CHDman Batch - Execution log> "%LOG_FILE%"
+    echo Started: %DATE% %TIME%>> "%LOG_FILE%"
+    echo ============================================================>> "%LOG_FILE%"
+)
+if "%~3"=="" (
+    echo [%DATE% %TIME%] %~4  %~1  input="%~2">> "%LOG_FILE%"
+) else (
+    echo [%DATE% %TIME%] %~4  %~1  input="%~2" output="%~3">> "%LOG_FILE%"
+)
+exit /b 0
+
+REM ============================================================
 :MENU
 cls
 echo ============================================================
@@ -285,8 +327,10 @@ echo.
 echo.
 if exist "!OUT!" (
     echo %CREATE_OK% !OUT!
+    call :LOG_COMMAND "!SUBCMD!" "%SRC%" "!OUT!" "OK"
 ) else (
     echo %CREATE_FAILED%
+    call :LOG_COMMAND "!SUBCMD!" "%SRC%" "!OUT!" "FAILED"
 )
 echo.
 pause
@@ -404,7 +448,13 @@ pushd "%FDIR%"
 echo.
 echo %BATCH_CD_LABEL% %F%
 "%CHDMAN%" createcd --force --input "%F%" --output "%FDIR%%FNAME%.chd"
-if exist "%FDIR%%FNAME%.chd" (set /a COUNT+=1) else (set /a FAIL+=1)
+if exist "%FDIR%%FNAME%.chd" (
+    set /a COUNT+=1
+    call :LOG_COMMAND "createcd" "%F%" "%FDIR%%FNAME%.chd" "OK"
+) else (
+    set /a FAIL+=1
+    call :LOG_COMMAND "createcd" "%F%" "%FDIR%%FNAME%.chd" "FAILED"
+)
 popd
 exit /b
 
@@ -416,7 +466,13 @@ pushd "%FDIR%"
 echo.
 echo %BATCH_DVD_LABEL% %F%
 "%CHDMAN%" createdvd --force --input "%F%" --output "%FDIR%%FNAME%.chd"
-if exist "%FDIR%%FNAME%.chd" (set /a COUNT+=1) else (set /a FAIL+=1)
+if exist "%FDIR%%FNAME%.chd" (
+    set /a COUNT+=1
+    call :LOG_COMMAND "createdvd" "%F%" "%FDIR%%FNAME%.chd" "OK"
+) else (
+    set /a FAIL+=1
+    call :LOG_COMMAND "createdvd" "%F%" "%FDIR%%FNAME%.chd" "FAILED"
+)
 popd
 exit /b
 
@@ -482,8 +538,10 @@ echo.
 echo.
 if exist "!OUT!" (
     echo %EXTRACT_OK% !OUT!
+    call :LOG_COMMAND "!SUBCMD!" "%SRC%" "!OUT!" "OK"
 ) else (
     echo %EXTRACT_FAILED%
+    call :LOG_COMMAND "!SUBCMD!" "%SRC%" "!OUT!" "FAILED"
 )
 echo.
 pause
@@ -593,7 +651,13 @@ if "%ETYPE2%"=="3" (
 echo.
 echo %BATCH_EXTRACT_LABEL% %F%
 "%CHDMAN%" !SUBCMD! --force --input "%F%" --output "!OUT!"
-if exist "!OUT!" (set /a COUNT+=1) else (set /a FAIL+=1)
+if exist "!OUT!" (
+    set /a COUNT+=1
+    call :LOG_COMMAND "!SUBCMD!" "%F%" "!OUT!" "OK"
+) else (
+    set /a FAIL+=1
+    call :LOG_COMMAND "!SUBCMD!" "%F%" "!OUT!" "FAILED"
+)
 popd
 exit /b
 
@@ -622,6 +686,11 @@ if not exist "%SRC%" (
 
 echo.
 "%CHDMAN%" verify --input "%SRC%"
+if %ERRORLEVEL%==0 (
+    call :LOG_COMMAND "verify" "%SRC%" "" "OK"
+) else (
+    call :LOG_COMMAND "verify" "%SRC%" "" "FAILED"
+)
 echo.
 pause
 goto MENU
@@ -651,6 +720,11 @@ if not exist "%SRC%" (
 
 echo.
 "%CHDMAN%" info --input "%SRC%" --verbose
+if %ERRORLEVEL%==0 (
+    call :LOG_COMMAND "info" "%SRC%" "" "OK"
+) else (
+    call :LOG_COMMAND "info" "%SRC%" "" "FAILED"
+)
 echo.
 pause
 goto MENU
@@ -699,8 +773,10 @@ echo.
 echo.
 if exist "!OUT!" (
     echo %CREATE_OK% !OUT!
+    call :LOG_COMMAND "createhd" "%SRC%" "!OUT!" "OK"
 ) else (
     echo %CREATE_FAILED%
+    call :LOG_COMMAND "createhd" "%SRC%" "!OUT!" "FAILED"
 )
 echo.
 pause

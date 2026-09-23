@@ -37,6 +37,16 @@ CONFIG_FILE="${SCRIPT_DIR}/chdman-tool.local.cfg"
 DEFAULT_LANG="en"
 
 # ------------------------------------------------------------
+# Journal d'execution : un fichier par lancement du script,
+# horodate dans son nom, cree a cote du script (portable). Le
+# nom est fige une seule fois au demarrage ; le contenu est
+# ecrit par log_command() a chaque commande chdman executee
+# (ROADMAP.md, Phase 3). Couvert par le motif "*.log" existant
+# dans .gitignore.
+# ------------------------------------------------------------
+LOG_FILE="${SCRIPT_DIR}/chdman-tool_$(date +%Y%m%d_%H%M%S).log"
+
+# ------------------------------------------------------------
 # Detection de l'OS et de l'architecture, puis du binaire
 # chdman correspondant.
 #
@@ -366,6 +376,35 @@ confirm_overwrite() {
     esac
 }
 
+# ------------------------------------------------------------
+# log_command - consigne une commande chdman executee et son
+# resultat dans le journal d'execution (LOG_FILE). Le fichier
+# n'est cree qu'au premier appel (aucun fichier residuel si le
+# script est lance puis quitte sans effectuer d'operation).
+# Arguments : $1 sous-commande chdman (createcd, verify, ...),
+# $2 chemin d'entree, $3 chemin de sortie (peut etre vide pour
+# verify/info), $4 resultat ("OK" ou "FAILED").
+# ------------------------------------------------------------
+log_command() {
+    local subcmd="$1" in_path="$2" out_path="$3" result="$4"
+    if [ ! -f "${LOG_FILE}" ]; then
+        {
+            echo "CHDman Batch - Execution log"
+            echo "Started: $(date '+%Y-%m-%d %H:%M:%S')"
+            echo "============================================================"
+        } > "${LOG_FILE}"
+    fi
+    if [ -n "${out_path}" ]; then
+        printf '[%s] %-6s %-12s input="%s" output="%s"\n' \
+            "$(date '+%Y-%m-%d %H:%M:%S')" "${result}" "${subcmd}" "${in_path}" "${out_path}" \
+            >> "${LOG_FILE}"
+    else
+        printf '[%s] %-6s %-12s input="%s"\n' \
+            "$(date '+%Y-%m-%d %H:%M:%S')" "${result}" "${subcmd}" "${in_path}" \
+            >> "${LOG_FILE}"
+    fi
+}
+
 # ============================================================
 # MENU PRINCIPAL
 # ============================================================
@@ -472,8 +511,10 @@ create_single() {
     echo ""
     if [ -f "${out}" ]; then
         echo "${CREATE_OK} ${out}"
+        log_command "${subcmd}" "${src}" "${out}" "OK"
     else
         echo "${CREATE_FAILED}"
+        log_command "${subcmd}" "${src}" "${out}" "FAILED"
     fi
     echo ""
     read -r -p "" _
@@ -494,8 +535,10 @@ do_create_cd() {
     if "${CHDMAN}" createcd --force --input "${f}" --output "${out}"; then :; fi
     if [ -f "${out}" ]; then
         BATCH_COUNT=$((BATCH_COUNT + 1))
+        log_command "createcd" "${f}" "${out}" "OK"
     else
         BATCH_FAIL=$((BATCH_FAIL + 1))
+        log_command "createcd" "${f}" "${out}" "FAILED"
     fi
 }
 
@@ -511,8 +554,10 @@ do_create_dvd() {
     if "${CHDMAN}" createdvd --force --input "${f}" --output "${out}"; then :; fi
     if [ -f "${out}" ]; then
         BATCH_COUNT=$((BATCH_COUNT + 1))
+        log_command "createdvd" "${f}" "${out}" "OK"
     else
         BATCH_FAIL=$((BATCH_FAIL + 1))
+        log_command "createdvd" "${f}" "${out}" "FAILED"
     fi
 }
 
@@ -670,8 +715,10 @@ extract_single() {
     echo ""
     if [ -f "${out}" ]; then
         echo "${EXTRACT_OK} ${out}"
+        log_command "${subcmd}" "${src}" "${out}" "OK"
     else
         echo "${EXTRACT_FAILED}"
+        log_command "${subcmd}" "${src}" "${out}" "FAILED"
     fi
     echo ""
     read -r -p "" _
@@ -699,8 +746,10 @@ do_extract() {
     if "${CHDMAN}" "${subcmd}" --force --input "${f}" --output "${out}"; then :; fi
     if [ -f "${out}" ]; then
         BATCH_COUNT=$((BATCH_COUNT + 1))
+        log_command "${subcmd}" "${f}" "${out}" "OK"
     else
         BATCH_FAIL=$((BATCH_FAIL + 1))
+        log_command "${subcmd}" "${f}" "${out}" "FAILED"
     fi
 }
 
@@ -804,8 +853,14 @@ verify_chd() {
     fi
 
     echo ""
-    "${CHDMAN}" verify --input "${src}" || true
+    local verify_status=0
+    "${CHDMAN}" verify --input "${src}" || verify_status=$?
     echo ""
+    if [ "${verify_status}" -eq 0 ]; then
+        log_command "verify" "${src}" "" "OK"
+    else
+        log_command "verify" "${src}" "" "FAILED"
+    fi
     read -r -p "" _
 }
 
@@ -834,8 +889,14 @@ info_chd() {
     fi
 
     echo ""
-    "${CHDMAN}" info --input "${src}" --verbose || true
+    local info_status=0
+    "${CHDMAN}" info --input "${src}" --verbose || info_status=$?
     echo ""
+    if [ "${info_status}" -eq 0 ]; then
+        log_command "info" "${src}" "" "OK"
+    else
+        log_command "info" "${src}" "" "FAILED"
+    fi
     read -r -p "" _
 }
 
@@ -881,8 +942,10 @@ create_hd() {
     echo ""
     if [ -f "${out}" ]; then
         echo "${CREATE_OK} ${out}"
+        log_command "createhd" "${src}" "${out}" "OK"
     else
         echo "${CREATE_FAILED}"
+        log_command "createhd" "${src}" "${out}" "FAILED"
     fi
     echo ""
     read -r -p "" _
