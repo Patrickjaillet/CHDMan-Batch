@@ -91,5 +91,12 @@ INFO_TITLE=INFOS D'UN CHD
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=COMPRESSER UNE IMAGE DE DISQUE DUR
 
+; ==== Confirmation d'ecrasement ====
+OVERWRITE_PROMPT=Le fichier de sortie suivant existe deja :
+OVERWRITE_CONFIRM=L'ecraser ? (o/N) :
+OVERWRITE_CANCELLED=Annule : le fichier existant n'a pas ete ecrase.
+BATCH_OVERWRITE_PROMPT=fichier(s) de sortie existent deja et seraient ecrases.
+BATCH_OVERWRITE_CONFIRM=Les ecraser ? (o/N) :
+
 ; ==== Exit ====
 GOODBYE=Au revoir !

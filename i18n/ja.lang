@@ -91,5 +91,12 @@ INFO_TITLE=CHD の情報
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=ハードディスクイメージを圧縮
 
+; ==== 上書き確認 ====
+OVERWRITE_PROMPT=以下の出力ファイルは既に存在します：
+OVERWRITE_CONFIRM=上書きしますか？ (y/N)：
+OVERWRITE_CANCELLED=中止しました。既存のファイルは上書きされていません。
+BATCH_OVERWRITE_PROMPT=個の出力ファイルが既に存在し、上書きされます。
+BATCH_OVERWRITE_CONFIRM=上書きしますか？ (y/N)：
+
 ; ==== Exit ====
 GOODBYE=さようなら！

@@ -91,5 +91,12 @@ INFO_TITLE=CHD 信息
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=压缩硬盘镜像
 
+; ==== 覆盖确认 ====
+OVERWRITE_PROMPT=以下输出文件已存在：
+OVERWRITE_CONFIRM=要覆盖吗？ (y/N)：
+OVERWRITE_CANCELLED=已取消：现有文件未被覆盖。
+BATCH_OVERWRITE_PROMPT=个输出文件已存在，将被覆盖。
+BATCH_OVERWRITE_CONFIRM=要覆盖它们吗？ (y/N)：
+
 ; ==== Exit ====
 GOODBYE=再见！

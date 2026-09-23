@@ -1,4 +1,4 @@
-# CHDman Batch UI
+# CHDman Batch
 
 A portable, menu-driven interface for `chdman` — create, extract, verify and inspect CHD (Compressed Hunks of Data) files without touching a command line.
 
@@ -69,7 +69,7 @@ The embedded `chdman` binary is part of the [MAME project](https://github.com/ma
 
 - **Author:** Patrick JAILLET
 - **E-mail:** sandefjord.development@proton.me
-- **Website:** https://patrickjaillet.github.io/CHDMan-Batch-UI
+- **Website:** https://patrickjaillet.github.io/CHDMan-Batch
 
 ## Contributing
 

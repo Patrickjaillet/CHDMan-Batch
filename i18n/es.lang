@@ -91,5 +91,12 @@ INFO_TITLE=INFORMACION DE UN CHD
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=COMPRIMIR UNA IMAGEN DE DISCO DURO
 
+; ==== Confirmacion de sobrescritura ====
+OVERWRITE_PROMPT=El siguiente archivo de salida ya existe:
+OVERWRITE_CONFIRM=Sobrescribirlo? (s/N):
+OVERWRITE_CANCELLED=Cancelado: el archivo existente no fue sobrescrito.
+BATCH_OVERWRITE_PROMPT=archivo(s) de salida ya existen y serian sobrescritos.
+BATCH_OVERWRITE_CONFIRM=Sobrescribirlos? (s/N):
+
 ; ==== Exit ====
 GOODBYE=Adios!

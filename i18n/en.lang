@@ -91,5 +91,12 @@ INFO_TITLE=CHD INFORMATION
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=COMPRESS A HARD DISK IMAGE
 
+; ==== Overwrite confirmation ====
+OVERWRITE_PROMPT=The following output file already exists:
+OVERWRITE_CONFIRM=Overwrite it? (y/N):
+OVERWRITE_CANCELLED=Cancelled: the existing file was not overwritten.
+BATCH_OVERWRITE_PROMPT=output file(s) already exist and would be overwritten.
+BATCH_OVERWRITE_CONFIRM=Overwrite them? (y/N):
+
 ; ==== Exit ====
 GOODBYE=Goodbye!

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0]
+
+### Added
+- Confirmation prompt before overwriting an existing output file, on all
+  three scripts (Windows, Linux, macOS), replacing the previous silent
+  `--force` behaviour: single-file operations (create, extract, `createhd`)
+  now ask before overwriting; batch operations (create, extract) ask once
+  with a count of how many existing files would be overwritten, rather than
+  once per file
+- CI workflow (`.github/workflows/validate-native-binaries.yml`) that runs
+  `createhd`, `verify` and `info` with the embedded native binaries on real
+  GitHub Actions runners for Linux (x64, arm64) and macOS (x64, arm64)
+
 ## [0.4.0]
 
 ### Added
@@ -110,8 +123,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No automated tests yet
 - Destructive operations (`--force`) run without user confirmation
 
-[Unreleased]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.3.0...v0.4.0
-[0.3.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/releases/tag/v0.1.0
+[Unreleased]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/patrickjaillet/CHDMan-Batch/releases/tag/v0.1.0

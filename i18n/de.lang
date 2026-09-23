@@ -91,5 +91,12 @@ INFO_TITLE=CHD-INFORMATIONEN
 ; ==== 7) Create HD ====
 CREATE_HD_TITLE=FESTPLATTENABBILD KOMPRIMIEREN
 
+; ==== Ueberschreibungsbestaetigung ====
+OVERWRITE_PROMPT=Die folgende Ausgabedatei existiert bereits:
+OVERWRITE_CONFIRM=Ueberschreiben? (j/N):
+OVERWRITE_CANCELLED=Abgebrochen: Die vorhandene Datei wurde nicht ueberschrieben.
+BATCH_OVERWRITE_PROMPT=Ausgabedatei(en) existieren bereits und wuerden ueberschrieben.
+BATCH_OVERWRITE_CONFIRM=Ueberschreiben? (j/N):
+
 ; ==== Exit ====
 GOODBYE=Auf Wiedersehen!

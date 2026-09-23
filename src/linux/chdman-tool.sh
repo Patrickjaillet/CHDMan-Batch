@@ -334,6 +334,38 @@ clean_path() {
     printf '%s' "${p}"
 }
 
+# ------------------------------------------------------------
+# confirm_overwrite - si le fichier de sortie donne en argument
+# existe deja, demande une confirmation interactive (o/N,
+# reponse par defaut = non) avant de poursuivre. Retourne 0 si
+# l'operation doit continuer (fichier absent, ou confirmation
+# positive), 1 sinon (annulation demandee par l'utilisateur).
+# Remplace l'usage systematique de "--force" sans confirmation
+# (ROADMAP.md, Phase 3).
+# ------------------------------------------------------------
+confirm_overwrite() {
+    local out="$1" answer
+    if [ ! -e "${out}" ]; then
+        return 0
+    fi
+    echo ""
+    echo "${OVERWRITE_PROMPT}"
+    echo "  ${out}"
+    read -r -p "${OVERWRITE_CONFIRM} " answer
+    # Accepte "oui" dans les 6 langues du projet : y/Y (en/de reponse
+    # affichee comme "y/N" pour toutes les langues, voir i18n/*.lang),
+    # o/O (fr "oui"), s/S (es "si"), j/J (de "ja").
+    case "${answer}" in
+        [yYoOsSjJ]) return 0 ;;
+        *)
+            echo ""
+            echo "${OVERWRITE_CANCELLED}"
+            read -r -p "" _
+            return 1
+            ;;
+    esac
+}
+
 # ============================================================
 # MENU PRINCIPAL
 # ============================================================
@@ -427,6 +459,8 @@ create_single() {
 
     out="${src_dir}${src_name}.chd"
 
+    confirm_overwrite "${out}" || return
+
     echo ""
     echo "------------------------------------------------------------"
     echo " ${COMMAND_LABEL} \"${CHDMAN}\" ${subcmd} --force --input \"${src}\" --output \"${out}\""
@@ -510,6 +544,46 @@ create_batch() {
     echo "  ${BATCH_TYPE_BOTH}"
     read -r -p "${BATCH_TYPE_CHOICE} " btype
 
+    # Compte, sans rien executer, le nombre de fichiers ".chd" de
+    # sortie qui existent deja et seraient ecrases par ce lot, pour
+    # demander une confirmation groupee unique plutot qu'une
+    # confirmation par fichier (impraticable sur un lot).
+    local existing_count=0 f_dir f_name
+    case "${btype}" in
+        1|3)
+            while IFS= read -r -d '' f; do
+                f_dir="$(cd "$(dirname "${f}")" >/dev/null 2>&1 && pwd)/"
+                f_name="$(basename "${f}")"; f_name="${f_name%.*}"
+                [ -e "${f_dir}${f_name}.chd" ] && existing_count=$((existing_count + 1))
+            done < <(find "${src_root}" -type f \( -iname "*.cue" -o -iname "*.gdi" \) -print0)
+            ;;
+    esac
+    case "${btype}" in
+        2|3)
+            while IFS= read -r -d '' f; do
+                f_dir="$(cd "$(dirname "${f}")" >/dev/null 2>&1 && pwd)/"
+                f_name="$(basename "${f}")"; f_name="${f_name%.*}"
+                [ -e "${f_dir}${f_name}.chd" ] && existing_count=$((existing_count + 1))
+            done < <(find "${src_root}" -type f -iname "*.iso" -print0)
+            ;;
+    esac
+
+    if [ "${existing_count}" -gt 0 ]; then
+        local batch_answer
+        echo ""
+        echo "${existing_count} ${BATCH_OVERWRITE_PROMPT}"
+        read -r -p "${BATCH_OVERWRITE_CONFIRM} " batch_answer
+        case "${batch_answer}" in
+            [yYoOsSjJ]) : ;;
+            *)
+                echo ""
+                echo "${OVERWRITE_CANCELLED}"
+                read -r -p "" _
+                return
+                ;;
+        esac
+    fi
+
     BATCH_COUNT=0
     BATCH_FAIL=0
 
@@ -583,6 +657,8 @@ extract_single() {
         *) subcmd="extractcd"; out="${src_dir}${src_name}.cue" ;;
     esac
 
+    confirm_overwrite "${out}" || return
+
     echo ""
     echo "------------------------------------------------------------"
     echo " ${COMMAND_LABEL} \"${CHDMAN}\" ${subcmd} --force --input \"${src}\" --output \"${out}\""
@@ -655,6 +731,38 @@ extract_batch() {
     echo "  ${OUTPUT_FORMAT_GDI}"
     echo "  ${OUTPUT_FORMAT_ISO}"
     read -r -p "${OUTPUT_FORMAT_CHOICE} " etype
+
+    # Compte, sans rien executer, le nombre de fichiers de sortie qui
+    # existent deja et seraient ecrases (voir la note equivalente dans
+    # create_batch() ci-dessus).
+    local existing_count=0 f_dir f_name out_ext
+    case "${etype}" in
+        1) out_ext="cue" ;;
+        2) out_ext="gdi" ;;
+        3) out_ext="iso" ;;
+        *) out_ext="cue" ;;
+    esac
+    while IFS= read -r -d '' f; do
+        f_dir="$(cd "$(dirname "${f}")" >/dev/null 2>&1 && pwd)/"
+        f_name="$(basename "${f}")"; f_name="${f_name%.*}"
+        [ -e "${f_dir}${f_name}.${out_ext}" ] && existing_count=$((existing_count + 1))
+    done < <(find "${src_root}" -type f -iname "*.chd" -print0)
+
+    if [ "${existing_count}" -gt 0 ]; then
+        local batch_answer
+        echo ""
+        echo "${existing_count} ${BATCH_OVERWRITE_PROMPT}"
+        read -r -p "${BATCH_OVERWRITE_CONFIRM} " batch_answer
+        case "${batch_answer}" in
+            [yYoOsSjJ]) : ;;
+            *)
+                echo ""
+                echo "${OVERWRITE_CANCELLED}"
+                read -r -p "" _
+                return
+                ;;
+        esac
+    fi
 
     BATCH_COUNT=0
     BATCH_FAIL=0
@@ -759,6 +867,8 @@ create_hd() {
     src_name="$(basename "${src}")"
     src_name="${src_name%.*}"
     out="${src_dir}${src_name}.chd"
+
+    confirm_overwrite "${out}" || return
 
     echo ""
     echo "------------------------------------------------------------"

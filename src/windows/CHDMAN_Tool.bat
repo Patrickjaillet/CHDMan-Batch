@@ -161,6 +161,32 @@ call :SAVE_LANG
 exit /b 0
 
 REM ============================================================
+REM  CONFIRM_OVERWRITE - si le fichier passe en %1 existe deja,
+REM  demande une confirmation interactive (o/N, reponse par
+REM  defaut = non) avant de poursuivre. Positionne CONFIRM_RESULT
+REM  a 1 pour continuer (fichier absent, ou confirmation positive)
+REM  ou 0 pour annuler. Remplace l'usage systematique de "--force"
+REM  sans confirmation (ROADMAP.md, Phase 3).
+REM ============================================================
+:CONFIRM_OVERWRITE
+set "CONFIRM_RESULT=1"
+if not exist "%~1" exit /b 0
+echo.
+echo %OVERWRITE_PROMPT%
+echo   %~1
+set "OWANSWER="
+set /p "OWANSWER=%OVERWRITE_CONFIRM% "
+if /i "%OWANSWER%"=="y" exit /b 0
+if /i "%OWANSWER%"=="o" exit /b 0
+if /i "%OWANSWER%"=="s" exit /b 0
+if /i "%OWANSWER%"=="j" exit /b 0
+set "CONFIRM_RESULT=0"
+echo.
+echo %OVERWRITE_CANCELLED%
+pause
+exit /b 0
+
+REM ============================================================
 :MENU
 cls
 echo ============================================================
@@ -245,6 +271,9 @@ if "%DTYPE%"=="2" (
     set "SUBCMD=createcd"
 )
 
+call :CONFIRM_OVERWRITE "!OUT!"
+if "%CONFIRM_RESULT%"=="0" goto MENU
+
 echo.
 echo ------------------------------------------------------------
 echo  %COMMAND_LABEL% "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
@@ -293,6 +322,35 @@ echo   %BATCH_TYPE_DVD%
 echo   %BATCH_TYPE_BOTH%
 set /p "BTYPE=%BATCH_TYPE_CHOICE% "
 
+REM Compte, sans rien executer, le nombre de fichiers ".chd" de
+REM sortie qui existent deja et seraient ecrases par ce lot, pour
+REM demander une confirmation groupee unique plutot qu'une
+REM confirmation par fichier (impraticable sur un lot).
+set "EXIST_COUNT=0"
+pushd "%SRC_ROOT%"
+if "%BTYPE%"=="1" call :COUNT_EXISTING_CD
+if "%BTYPE%"=="2" call :COUNT_EXISTING_DVD
+if "%BTYPE%"=="3" (call :COUNT_EXISTING_CD & call :COUNT_EXISTING_DVD)
+popd
+
+if not "%EXIST_COUNT%"=="0" (
+    echo.
+    echo !EXIST_COUNT! %BATCH_OVERWRITE_PROMPT%
+    set "BOWANSWER="
+    set /p "BOWANSWER=%BATCH_OVERWRITE_CONFIRM% "
+    set "BOWPROCEED=0"
+    if /i "!BOWANSWER!"=="y" set "BOWPROCEED=1"
+    if /i "!BOWANSWER!"=="o" set "BOWPROCEED=1"
+    if /i "!BOWANSWER!"=="s" set "BOWPROCEED=1"
+    if /i "!BOWANSWER!"=="j" set "BOWPROCEED=1"
+    if "!BOWPROCEED!"=="0" (
+        echo.
+        echo %OVERWRITE_CANCELLED%
+        pause
+        goto MENU
+    )
+)
+
 set "COUNT=0"
 set "FAIL=0"
 
@@ -325,6 +383,18 @@ echo  %BATCH_DONE% !COUNT!   %BATCH_FAILURES% !FAIL!
 echo ============================================================
 pause
 goto MENU
+
+:COUNT_EXISTING_CD
+for /R %%i in (*.cue *.gdi) do call :DO_COUNT_EXISTING "%%i"
+exit /b
+
+:COUNT_EXISTING_DVD
+for /R %%i in (*.iso) do call :DO_COUNT_EXISTING "%%i"
+exit /b
+
+:DO_COUNT_EXISTING
+if exist "%~dp1%~n1.chd" set /a EXIST_COUNT+=1
+exit /b
 
 :DO_CREATE_CD
 set "F=%~1"
@@ -398,6 +468,9 @@ if "%ETYPE%"=="3" (
     set "OUT=!SRC_DIR!!SRC_NAME!.iso"
 )
 
+call :CONFIRM_OVERWRITE "!OUT!"
+if "%CONFIRM_RESULT%"=="0" goto MENU
+
 echo.
 echo ------------------------------------------------------------
 echo  %COMMAND_LABEL% "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
@@ -446,6 +519,39 @@ echo   %OUTPUT_FORMAT_GDI%
 echo   %OUTPUT_FORMAT_ISO%
 set /p "ETYPE=%OUTPUT_FORMAT_CHOICE% "
 
+REM Compte, sans rien executer, le nombre de fichiers de sortie qui
+REM existent deja et seraient ecrases (meme logique que dans
+REM CREATE_BATCH ci-dessus). OUTEXT est reinitialise avant chaque
+REM test pour ne jamais reutiliser une valeur laissee par un appel
+REM precedent de ce menu (choix invalide -> repli sur "cue", comme
+REM le fait DO_EXTRACT pour le sous-titre "extractcd").
+set "OUTEXT=cue"
+if "%ETYPE%"=="2" set "OUTEXT=gdi"
+if "%ETYPE%"=="3" set "OUTEXT=iso"
+
+set "EXIST_COUNT=0"
+pushd "%SRC_ROOT%"
+for /R %%i in (*.chd) do call :DO_COUNT_EXISTING_EXTRACT "%%i" "%OUTEXT%"
+popd
+
+if not "%EXIST_COUNT%"=="0" (
+    echo.
+    echo !EXIST_COUNT! %BATCH_OVERWRITE_PROMPT%
+    set "BOWANSWER="
+    set /p "BOWANSWER=%BATCH_OVERWRITE_CONFIRM% "
+    set "BOWPROCEED=0"
+    if /i "!BOWANSWER!"=="y" set "BOWPROCEED=1"
+    if /i "!BOWANSWER!"=="o" set "BOWPROCEED=1"
+    if /i "!BOWANSWER!"=="s" set "BOWPROCEED=1"
+    if /i "!BOWANSWER!"=="j" set "BOWPROCEED=1"
+    if "!BOWPROCEED!"=="0" (
+        echo.
+        echo %OVERWRITE_CANCELLED%
+        pause
+        goto MENU
+    )
+)
+
 set "COUNT=0"
 set "FAIL=0"
 
@@ -459,6 +565,10 @@ echo  %BATCH_DONE_EXTRACT% !COUNT!   %BATCH_FAILURES% !FAIL!
 echo ============================================================
 pause
 goto MENU
+
+:DO_COUNT_EXISTING_EXTRACT
+if exist "%~dp1%~n1.%~2" set /a EXIST_COUNT+=1
+exit /b
 
 :DO_EXTRACT
 set "F=%~1"
@@ -574,6 +684,9 @@ for %%F in ("%SRC%") do (
 )
 
 set "OUT=!SRC_DIR!!SRC_NAME!.chd"
+
+call :CONFIRM_OVERWRITE "!OUT!"
+if "%CONFIRM_RESULT%"=="0" goto MENU
 
 echo.
 echo ------------------------------------------------------------
