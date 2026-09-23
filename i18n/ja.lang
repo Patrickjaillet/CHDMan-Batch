@@ -1,0 +1,95 @@
+﻿LANG_NAME=日本語
+LANG_CODE=ja
+
+; ==== Language selector ====
+LANGSEL_TITLE=CHDMAN TOOL - 言語選択
+LANGSEL_PROMPT=言語を選択してください / Choose your language :
+LANGSEL_1=[1] English
+LANGSEL_2=[2] Francais
+LANGSEL_3=[3] Deutsch
+LANGSEL_4=[4] Espanol
+LANGSEL_5=[5] 日本語
+LANGSEL_6=[6] Chinese (Simplified)
+LANGSEL_CHOICE=選択 (1-6) :
+LANGSEL_INVALID=無効な選択です。
+
+; ==== Startup errors ====
+ERR_CHDMAN_MISSING=[エラー] このフォルダに chdman.exe が見つかりません:
+ERR_CHDMAN_MISSING_HINT=CHDMAN_Tool.bat を chdman.exe と同じフォルダに置いてください
+
+; ==== Main menu ====
+MENU_TITLE=CHDMAN TOOL - メニュー
+MENU_LANG_LABEL=言語
+MENU_1=[1] 1つのファイルから CHD を作成 (CUE / GDI / ISO)
+MENU_2=[2] CHD を一括作成 (フォルダとサブフォルダ全体)
+MENU_3=[3] CHD を抽出 (CUE+BIN, GDI, ISO)
+MENU_4=[4] CHD を一括抽出 (フォルダ全体)
+MENU_5=[5] CHD の整合性を検証
+MENU_6=[6] CHD の情報を表示
+MENU_7=[7] ハードディスクイメージを圧縮 (createhd / createraw)
+MENU_8=[8] 言語を変更
+MENU_9=[9] 終了
+MENU_CHOICE=選択 (1-9) :
+MENU_INVALID=無効な選択です。
+
+; ==== Common prompts ====
+PROMPT_DROP_FILE_CUE=.cue、.gdi、または .iso ファイルをここにドラッグ&ドロップし、
+PROMPT_DROP_FILE_CHD=.chd ファイルをここにドラッグ&ドロップし、
+PROMPT_DROP_FILE_HD=イメージファイル (.img, .raw, .hdd 等) をここにドラッグ&ドロップし、
+PROMPT_DROP_FOLDER=スキャンするルートフォルダをここにドラッグ&ドロップし、
+PROMPT_THEN_ENTER=Enter キーを押してください (またはフルパスを入力してください):
+PROMPT_SOURCE_FILE=ソースファイル:
+PROMPT_SOURCE_FOLDER=ソースフォルダ:
+PROMPT_CHD_FILE=.chd ファイル:
+ERR_FILE_NOT_FOUND=[エラー] ファイルが見つかりません:
+ERR_FOLDER_NOT_FOUND=[エラー] フォルダが見つかりません:
+
+; ==== 1) Create - single file ====
+CREATE_SINGLE_TITLE=CHD を作成 - 単一ファイル
+DISK_TYPE_PROMPT=ディスクの種類:
+DISK_TYPE_CD=[1] CD (CUE/GDI - PSX, サターン, セガCD, ドリームキャスト...)
+DISK_TYPE_DVD=[2] DVD (ISO - ゲームキューブ, PS2, Xbox...)
+DISK_TYPE_CHOICE=選択 (1-2):
+COMMAND_LABEL=コマンド:
+CREATE_OK=[OK] CHD を作成しました:
+CREATE_FAILED=[警告] 変換に失敗した可能性があります。
+
+; ==== 2) Create - batch ====
+CREATE_BATCH_TITLE=CHD を一括作成
+BATCH_TYPE_PROMPT=処理するディスクの種類:
+BATCH_TYPE_CD=[1] CD のみ  (*.cue, *.gdi)          -> createcd
+BATCH_TYPE_DVD=[2] DVD のみ (*.iso)                 -> createdvd
+BATCH_TYPE_BOTH=[3] 両方 (CUE/GDI は CD、ISO は DVD)
+BATCH_TYPE_CHOICE=選択 (1-3):
+BATCH_DONE=完了しました。変換したファイル数:
+BATCH_FAILURES=失敗:
+BATCH_CD_LABEL=-> CD  :
+BATCH_DVD_LABEL=-> DVD :
+
+; ==== 3) Extract - single file ====
+EXTRACT_SINGLE_TITLE=CHD を抽出 - 単一ファイル
+OUTPUT_FORMAT_PROMPT=出力形式:
+OUTPUT_FORMAT_CUEBIN=[1] CUE + BIN  (CD - PSX, サターン, セガCD...)
+OUTPUT_FORMAT_GDI=[2] GDI        (ドリームキャスト)
+OUTPUT_FORMAT_ISO=[3] ISO        (DVD)
+OUTPUT_FORMAT_CHOICE=選択 (1-3):
+EXTRACT_OK=[OK] 抽出が完了しました:
+EXTRACT_FAILED=[警告] 抽出に失敗した可能性があります。
+
+; ==== 4) Extract - batch ====
+EXTRACT_BATCH_TITLE=CHD を一括抽出
+BATCH_OUTPUT_FORMAT_PROMPT=見つかったすべての CHD の出力形式:
+BATCH_DONE_EXTRACT=完了しました。抽出したファイル数:
+BATCH_EXTRACT_LABEL=->
+
+; ==== 5) Verify ====
+VERIFY_TITLE=CHD を検証
+
+; ==== 6) Info ====
+INFO_TITLE=CHD の情報
+
+; ==== 7) Create HD ====
+CREATE_HD_TITLE=ハードディスクイメージを圧縮
+
+; ==== Exit ====
+GOODBYE=さようなら！

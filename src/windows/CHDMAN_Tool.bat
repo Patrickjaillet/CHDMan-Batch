@@ -1,46 +1,186 @@
 @echo off
-title CHDMAN Tool - Menu Complet
+title CHDMAN Tool
 color 0A
 setlocal EnableDelayedExpansion
+chcp 65001 >nul
 
 REM ============================================================
 REM  CHDMAN TOOL - Interface complete pour chdman.exe
 REM  Compression / Extraction / Verification de fichiers CHD
 REM  Formats supportes en entree : CUE, GDI, ISO (CD et DVD)
+REM  Internationalisation : i18n\*.lang (EN/FR/DE/ES/JA/ZH)
 REM ============================================================
 
-REM Verifie que chdman.exe est present a cote du script
-if not exist "%~dp0chdman.exe" (
+set "SCRIPT_DIR=%~dp0"
+set "CHDMAN=%SCRIPT_DIR%chdman.exe"
+set "I18N_DIR=%SCRIPT_DIR%i18n\"
+set "CONFIG_FILE=%SCRIPT_DIR%chdman-tool.local.cfg"
+set "DEFAULT_LANG=en"
+
+REM ============================================================
+REM  Verifie que chdman.exe est present a cote du script
+REM  (message affiche en anglais : aucun fichier de langue
+REM  n'est encore garanti charge a ce stade)
+REM ============================================================
+if not exist "%CHDMAN%" (
     color 0C
     echo.
-    echo  [ERREUR] chdman.exe est introuvable dans ce dossier :
-    echo  %~dp0
+    echo  [ERROR] chdman.exe was not found in this folder:
+    echo  %SCRIPT_DIR%
     echo.
-    echo  Placez CHDMAN_Tool.bat dans le meme dossier que chdman.exe
+    echo  Place CHDMAN_Tool.bat in the same folder as chdman.exe
     echo.
     pause
     exit /b 1
 )
 
-set "CHDMAN=%~dp0chdman.exe"
+REM ============================================================
+REM  Determination de la langue active
+REM  Ordre de priorite :
+REM   1) Langue memorisee dans le fichier de configuration local
+REM   2) Langue detectee depuis les parametres regionaux systeme
+REM   3) Anglais par defaut
+REM ============================================================
+set "ACTIVE_LANG="
 
+if exist "%CONFIG_FILE%" (
+    for /f "usebackq tokens=1,* delims==" %%A in ("%CONFIG_FILE%") do (
+        if /i "%%A"=="LANG" set "ACTIVE_LANG=%%B"
+    )
+)
+
+if not defined ACTIVE_LANG (
+    call :DETECT_SYSTEM_LANG
+)
+
+if not defined ACTIVE_LANG set "ACTIVE_LANG=%DEFAULT_LANG%"
+if not exist "%I18N_DIR%%ACTIVE_LANG%.lang" set "ACTIVE_LANG=%DEFAULT_LANG%"
+
+call :LOAD_LANG "%ACTIVE_LANG%"
+
+REM Si aucun fichier de configuration n'existe encore (premier lancement),
+REM proposer explicitement le choix de langue avant d'entrer dans le menu.
+if not exist "%CONFIG_FILE%" call :LANGUAGE_MENU
+
+goto MENU
+
+REM ============================================================
+REM  DETECT_SYSTEM_LANG - detection de la langue systeme Windows
+REM  Utilise la variable d'environnement %LANG% si presente
+REM  (WSL / environnements POSIX embarques), sinon interroge
+REM  les parametres regionaux via la commande "reg query".
+REM ============================================================
+:DETECT_SYSTEM_LANG
+set "SYS_LOCALE="
+
+if defined LANG (
+    set "SYS_LOCALE=%LANG%"
+) else (
+    for /f "tokens=3" %%L in ('reg query "HKCU\Control Panel\Desktop" /v PreferredUILanguages 2^>nul ^| findstr /i PreferredUILanguages') do set "SYS_LOCALE=%%L"
+    if not defined SYS_LOCALE (
+        for /f "skip=2 tokens=3" %%L in ('reg query "HKCU\Control Panel\International" /v LocaleName 2^>nul') do set "SYS_LOCALE=%%L"
+    )
+)
+
+if not defined SYS_LOCALE (
+    set "ACTIVE_LANG="
+    exit /b 0
+)
+
+set "SYS_LOCALE_LC=%SYS_LOCALE%"
+REM Normalisation grossiere : ne garder que les deux premiers caracteres
+set "SYS_PREFIX=%SYS_LOCALE_LC:~0,2%"
+
+if /i "%SYS_PREFIX%"=="fr" set "ACTIVE_LANG=fr"
+if /i "%SYS_PREFIX%"=="de" set "ACTIVE_LANG=de"
+if /i "%SYS_PREFIX%"=="es" set "ACTIVE_LANG=es"
+if /i "%SYS_PREFIX%"=="ja" set "ACTIVE_LANG=ja"
+if /i "%SYS_PREFIX%"=="zh" set "ACTIVE_LANG=zh"
+if /i "%SYS_PREFIX%"=="en" set "ACTIVE_LANG=en"
+
+exit /b 0
+
+REM ============================================================
+REM  LOAD_LANG - charge le fichier %1.lang dans des variables
+REM  d'environnement (une variable par cle=valeur)
+REM ============================================================
+:LOAD_LANG
+set "LANG_FILE=%I18N_DIR%%~1.lang"
+if not exist "%LANG_FILE%" set "LANG_FILE=%I18N_DIR%%DEFAULT_LANG%.lang"
+
+for /f "usebackq eol=; tokens=1,* delims==" %%K in ("%LANG_FILE%") do (
+    if not "%%K"=="" set "%%K=%%L"
+)
+set "ACTIVE_LANG=%~1"
+exit /b 0
+
+REM ============================================================
+REM  SAVE_LANG - memorise la langue choisie dans le fichier
+REM  de configuration local (portable, a cote du script)
+REM ============================================================
+:SAVE_LANG
+> "%CONFIG_FILE%" (
+    echo LANG=%ACTIVE_LANG%
+)
+exit /b 0
+
+REM ============================================================
+REM  LANGUAGE_MENU - selecteur de langue interactif
+REM ============================================================
+:LANGUAGE_MENU
+cls
+echo ============================================================
+echo   %LANGSEL_TITLE%
+echo ============================================================
+echo.
+echo %LANGSEL_PROMPT%
+echo.
+echo   %LANGSEL_1%
+echo   %LANGSEL_2%
+echo   %LANGSEL_3%
+echo   %LANGSEL_4%
+echo   %LANGSEL_5%
+echo   %LANGSEL_6%
+echo.
+echo ============================================================
+set /p "LCHOICE=%LANGSEL_CHOICE% "
+
+if "%LCHOICE%"=="1" (call :LOAD_LANG "en") else (
+if "%LCHOICE%"=="2" (call :LOAD_LANG "fr") else (
+if "%LCHOICE%"=="3" (call :LOAD_LANG "de") else (
+if "%LCHOICE%"=="4" (call :LOAD_LANG "es") else (
+if "%LCHOICE%"=="5" (call :LOAD_LANG "ja") else (
+if "%LCHOICE%"=="6" (call :LOAD_LANG "zh") else (
+    echo.
+    echo %LANGSEL_INVALID%
+    pause
+    goto LANGUAGE_MENU
+))))))
+
+call :SAVE_LANG
+exit /b 0
+
+REM ============================================================
 :MENU
 cls
 echo ============================================================
-echo                     CHDMAN TOOL - MENU
+echo                     %MENU_TITLE%
 echo ============================================================
 echo.
-echo   [1] Creer un CHD depuis UN fichier (CUE / GDI / ISO)
-echo   [2] Creer des CHD en LOT (tout un dossier + sous-dossiers)
-echo   [3] Extraire un CHD (CUE+BIN, GDI ou ISO)
-echo   [4] Extraire des CHD en LOT (tout un dossier)
-echo   [5] Verifier l'integrite d'un CHD
-echo   [6] Afficher les infos d'un CHD
-echo   [7] Compresser un disque dur (createhd / createraw)
-echo   [8] Quitter
+echo   %MENU_LANG_LABEL% : %LANG_NAME%
+echo.
+echo   %MENU_1%
+echo   %MENU_2%
+echo   %MENU_3%
+echo   %MENU_4%
+echo   %MENU_5%
+echo   %MENU_6%
+echo   %MENU_7%
+echo   %MENU_8%
+echo   %MENU_9%
 echo.
 echo ============================================================
-set /p "CHOICE=Votre choix (1-8) : "
+set /p "CHOICE=%MENU_CHOICE% "
 
 if "%CHOICE%"=="1" goto CREATE_SINGLE
 if "%CHOICE%"=="2" goto CREATE_BATCH
@@ -49,9 +189,17 @@ if "%CHOICE%"=="4" goto EXTRACT_BATCH
 if "%CHOICE%"=="5" goto VERIFY_CHD
 if "%CHOICE%"=="6" goto INFO_CHD
 if "%CHOICE%"=="7" goto CREATE_HD
-if "%CHOICE%"=="8" goto END
-echo Choix invalide.
+if "%CHOICE%"=="8" goto CHANGE_LANG
+if "%CHOICE%"=="9" goto END
+echo %MENU_INVALID%
 pause
+goto MENU
+
+REM ============================================================
+REM 8) CHANGER DE LANGUE
+REM ============================================================
+:CHANGE_LANG
+call :LANGUAGE_MENU
 goto MENU
 
 REM ============================================================
@@ -60,19 +208,19 @@ REM ============================================================
 :CREATE_SINGLE
 cls
 echo ============================================================
-echo   CREER UN CHD - Fichier unique
+echo   %CREATE_SINGLE_TITLE%
 echo ============================================================
 echo.
-echo Glissez-deposez votre fichier .cue, .gdi ou .iso ici,
-echo puis appuyez sur Entree (ou tapez le chemin complet) :
+echo %PROMPT_DROP_FILE_CUE%
+echo %PROMPT_THEN_ENTER%
 echo.
 set "SRC="
-set /p "SRC=Fichier source : "
+set /p "SRC=%PROMPT_SOURCE_FILE% "
 set SRC=%SRC:"=%
 
 if not exist "%SRC%" (
     echo.
-    echo [ERREUR] Fichier introuvable : %SRC%
+    echo %ERR_FILE_NOT_FOUND% %SRC%
     pause
     goto MENU
 )
@@ -84,10 +232,10 @@ for %%F in ("%SRC%") do (
 )
 
 echo.
-echo Type de disque :
-echo   [1] CD (CUE/GDI - PSX, Saturn, SegaCD, Dreamcast...)
-echo   [2] DVD (ISO - GameCube, PS2, Xbox...)
-set /p "DTYPE=Choix (1-2) : "
+echo %DISK_TYPE_PROMPT%
+echo   %DISK_TYPE_CD%
+echo   %DISK_TYPE_DVD%
+set /p "DTYPE=%DISK_TYPE_CHOICE% "
 
 set "OUT=!SRC_DIR!!SRC_NAME!.chd"
 
@@ -99,7 +247,7 @@ if "%DTYPE%"=="2" (
 
 echo.
 echo ------------------------------------------------------------
-echo  Commande : "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
+echo  %COMMAND_LABEL% "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
 echo ------------------------------------------------------------
 echo.
 
@@ -107,9 +255,9 @@ echo.
 
 echo.
 if exist "!OUT!" (
-    echo [OK] CHD cree : !OUT!
+    echo %CREATE_OK% !OUT!
 ) else (
-    echo [ATTENTION] La conversion semble avoir echoue.
+    echo %CREATE_FAILED%
 )
 echo.
 pause
@@ -121,29 +269,29 @@ REM ============================================================
 :CREATE_BATCH
 cls
 echo ============================================================
-echo   CREER DES CHD EN LOT
+echo   %CREATE_BATCH_TITLE%
 echo ============================================================
 echo.
-echo Glissez-deposez le DOSSIER racine a scanner ici,
-echo puis appuyez sur Entree (ou tapez le chemin complet) :
+echo %PROMPT_DROP_FOLDER%
+echo %PROMPT_THEN_ENTER%
 echo.
 set "SRC_ROOT="
-set /p "SRC_ROOT=Dossier source : "
+set /p "SRC_ROOT=%PROMPT_SOURCE_FOLDER% "
 set SRC_ROOT=%SRC_ROOT:"=%
 
 if not exist "%SRC_ROOT%\" (
     echo.
-    echo [ERREUR] Dossier introuvable : %SRC_ROOT%
+    echo %ERR_FOLDER_NOT_FOUND% %SRC_ROOT%
     pause
     goto MENU
 )
 
 echo.
-echo Type de disques a traiter :
-echo   [1] CD uniquement  (*.cue, *.gdi)          -^> createcd
-echo   [2] DVD uniquement (*.iso)                 -^> createdvd
-echo   [3] Les deux (CUE/GDI en CD, ISO en DVD)
-set /p "BTYPE=Choix (1-3) : "
+echo %BATCH_TYPE_PROMPT%
+echo   %BATCH_TYPE_CD%
+echo   %BATCH_TYPE_DVD%
+echo   %BATCH_TYPE_BOTH%
+set /p "BTYPE=%BATCH_TYPE_CHOICE% "
 
 set "COUNT=0"
 set "FAIL=0"
@@ -173,7 +321,7 @@ popd
 
 echo.
 echo ============================================================
-echo  Termine. Fichiers convertis : !COUNT!   Echecs : !FAIL!
+echo  %BATCH_DONE% !COUNT!   %BATCH_FAILURES% !FAIL!
 echo ============================================================
 pause
 goto MENU
@@ -184,7 +332,7 @@ set "FDIR=%~dp1"
 set "FNAME=%~n1"
 pushd "%FDIR%"
 echo.
-echo -^> CD  : %F%
+echo %BATCH_CD_LABEL% %F%
 "%CHDMAN%" createcd --force --input "%F%" --output "%FDIR%%FNAME%.chd"
 if exist "%FDIR%%FNAME%.chd" (set /a COUNT+=1) else (set /a FAIL+=1)
 popd
@@ -196,7 +344,7 @@ set "FDIR=%~dp1"
 set "FNAME=%~n1"
 pushd "%FDIR%"
 echo.
-echo -^> DVD : %F%
+echo %BATCH_DVD_LABEL% %F%
 "%CHDMAN%" createdvd --force --input "%F%" --output "%FDIR%%FNAME%.chd"
 if exist "%FDIR%%FNAME%.chd" (set /a COUNT+=1) else (set /a FAIL+=1)
 popd
@@ -208,19 +356,19 @@ REM ============================================================
 :EXTRACT_SINGLE
 cls
 echo ============================================================
-echo   EXTRAIRE UN CHD - Fichier unique
+echo   %EXTRACT_SINGLE_TITLE%
 echo ============================================================
 echo.
-echo Glissez-deposez votre fichier .chd ici,
-echo puis appuyez sur Entree (ou tapez le chemin complet) :
+echo %PROMPT_DROP_FILE_CHD%
+echo %PROMPT_THEN_ENTER%
 echo.
 set "SRC="
-set /p "SRC=Fichier .chd : "
+set /p "SRC=%PROMPT_CHD_FILE% "
 set SRC=%SRC:"=%
 
 if not exist "%SRC%" (
     echo.
-    echo [ERREUR] Fichier introuvable : %SRC%
+    echo %ERR_FILE_NOT_FOUND% %SRC%
     pause
     goto MENU
 )
@@ -231,11 +379,11 @@ for %%F in ("%SRC%") do (
 )
 
 echo.
-echo Format de sortie :
-echo   [1] CUE + BIN  (CD - PSX, Saturn, SegaCD...)
-echo   [2] GDI        (Dreamcast)
-echo   [3] ISO        (DVD)
-set /p "ETYPE=Choix (1-3) : "
+echo %OUTPUT_FORMAT_PROMPT%
+echo   %OUTPUT_FORMAT_CUEBIN%
+echo   %OUTPUT_FORMAT_GDI%
+echo   %OUTPUT_FORMAT_ISO%
+set /p "ETYPE=%OUTPUT_FORMAT_CHOICE% "
 
 if "%ETYPE%"=="1" (
     set "SUBCMD=extractcd"
@@ -252,7 +400,7 @@ if "%ETYPE%"=="3" (
 
 echo.
 echo ------------------------------------------------------------
-echo  Commande : "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
+echo  %COMMAND_LABEL% "%CHDMAN%" !SUBCMD! --force --input "%SRC%" --output "!OUT!"
 echo ------------------------------------------------------------
 echo.
 
@@ -260,9 +408,9 @@ echo.
 
 echo.
 if exist "!OUT!" (
-    echo [OK] Extraction terminee : !OUT!
+    echo %EXTRACT_OK% !OUT!
 ) else (
-    echo [ATTENTION] L'extraction semble avoir echoue.
+    echo %EXTRACT_FAILED%
 )
 echo.
 pause
@@ -274,29 +422,29 @@ REM ============================================================
 :EXTRACT_BATCH
 cls
 echo ============================================================
-echo   EXTRAIRE DES CHD EN LOT
+echo   %EXTRACT_BATCH_TITLE%
 echo ============================================================
 echo.
-echo Glissez-deposez le DOSSIER racine a scanner ici,
-echo puis appuyez sur Entree (ou tapez le chemin complet) :
+echo %PROMPT_DROP_FOLDER%
+echo %PROMPT_THEN_ENTER%
 echo.
 set "SRC_ROOT="
-set /p "SRC_ROOT=Dossier source : "
+set /p "SRC_ROOT=%PROMPT_SOURCE_FOLDER% "
 set SRC_ROOT=%SRC_ROOT:"=%
 
 if not exist "%SRC_ROOT%\" (
     echo.
-    echo [ERREUR] Dossier introuvable : %SRC_ROOT%
+    echo %ERR_FOLDER_NOT_FOUND% %SRC_ROOT%
     pause
     goto MENU
 )
 
 echo.
-echo Format de sortie pour TOUS les CHD trouves :
-echo   [1] CUE + BIN
-echo   [2] GDI
-echo   [3] ISO (DVD)
-set /p "ETYPE=Choix (1-3) : "
+echo %BATCH_OUTPUT_FORMAT_PROMPT%
+echo   %OUTPUT_FORMAT_CUEBIN%
+echo   %OUTPUT_FORMAT_GDI%
+echo   %OUTPUT_FORMAT_ISO%
+set /p "ETYPE=%OUTPUT_FORMAT_CHOICE% "
 
 set "COUNT=0"
 set "FAIL=0"
@@ -307,7 +455,7 @@ popd
 
 echo.
 echo ============================================================
-echo  Termine. Fichiers extraits : !COUNT!   Echecs : !FAIL!
+echo  %BATCH_DONE_EXTRACT% !COUNT!   %BATCH_FAILURES% !FAIL!
 echo ============================================================
 pause
 goto MENU
@@ -333,7 +481,7 @@ if "%ETYPE2%"=="3" (
 )
 
 echo.
-echo -^> %F%
+echo %BATCH_EXTRACT_LABEL% %F%
 "%CHDMAN%" !SUBCMD! --force --input "%F%" --output "!OUT!"
 if exist "!OUT!" (set /a COUNT+=1) else (set /a FAIL+=1)
 popd
@@ -345,19 +493,19 @@ REM ============================================================
 :VERIFY_CHD
 cls
 echo ============================================================
-echo   VERIFIER UN CHD
+echo   %VERIFY_TITLE%
 echo ============================================================
 echo.
-echo Glissez-deposez votre fichier .chd ici,
-echo puis appuyez sur Entree (ou tapez le chemin complet) :
+echo %PROMPT_DROP_FILE_CHD%
+echo %PROMPT_THEN_ENTER%
 echo.
 set "SRC="
-set /p "SRC=Fichier .chd : "
+set /p "SRC=%PROMPT_CHD_FILE% "
 set SRC=%SRC:"=%
 
 if not exist "%SRC%" (
     echo.
-    echo [ERREUR] Fichier introuvable : %SRC%
+    echo %ERR_FILE_NOT_FOUND% %SRC%
     pause
     goto MENU
 )
@@ -374,19 +522,19 @@ REM ============================================================
 :INFO_CHD
 cls
 echo ============================================================
-echo   INFOS D'UN CHD
+echo   %INFO_TITLE%
 echo ============================================================
 echo.
-echo Glissez-deposez votre fichier .chd ici,
-echo puis appuyez sur Entree (ou tapez le chemin complet) :
+echo %PROMPT_DROP_FILE_CHD%
+echo %PROMPT_THEN_ENTER%
 echo.
 set "SRC="
-set /p "SRC=Fichier .chd : "
+set /p "SRC=%PROMPT_CHD_FILE% "
 set SRC=%SRC:"=%
 
 if not exist "%SRC%" (
     echo.
-    echo [ERREUR] Fichier introuvable : %SRC%
+    echo %ERR_FILE_NOT_FOUND% %SRC%
     pause
     goto MENU
 )
@@ -403,19 +551,19 @@ REM ============================================================
 :CREATE_HD
 cls
 echo ============================================================
-echo   COMPRESSER UNE IMAGE DE DISQUE DUR
+echo   %CREATE_HD_TITLE%
 echo ============================================================
 echo.
-echo Glissez-deposez votre image (.img, .raw, .hdd...) ici,
-echo puis appuyez sur Entree (ou tapez le chemin complet) :
+echo %PROMPT_DROP_FILE_HD%
+echo %PROMPT_THEN_ENTER%
 echo.
 set "SRC="
-set /p "SRC=Fichier source : "
+set /p "SRC=%PROMPT_SOURCE_FILE% "
 set SRC=%SRC:"=%
 
 if not exist "%SRC%" (
     echo.
-    echo [ERREUR] Fichier introuvable : %SRC%
+    echo %ERR_FILE_NOT_FOUND% %SRC%
     pause
     goto MENU
 )
@@ -429,7 +577,7 @@ set "OUT=!SRC_DIR!!SRC_NAME!.chd"
 
 echo.
 echo ------------------------------------------------------------
-echo  Commande : "%CHDMAN%" createhd --force --input "%SRC%" --output "!OUT!"
+echo  %COMMAND_LABEL% "%CHDMAN%" createhd --force --input "%SRC%" --output "!OUT!"
 echo ------------------------------------------------------------
 echo.
 
@@ -437,9 +585,9 @@ echo.
 
 echo.
 if exist "!OUT!" (
-    echo [OK] CHD cree : !OUT!
+    echo %CREATE_OK% !OUT!
 ) else (
-    echo [ATTENTION] La conversion semble avoir echoue.
+    echo %CREATE_FAILED%
 )
 echo.
 pause
@@ -448,7 +596,7 @@ goto MENU
 REM ============================================================
 :END
 echo.
-echo Au revoir !
+echo %GOODBYE%
 timeout /t 2 >nul
 endlocal
 exit /b 0
