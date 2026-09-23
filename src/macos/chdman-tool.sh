@@ -488,13 +488,14 @@ create_single() {
     echo "${DISK_TYPE_PROMPT}"
     echo "  ${DISK_TYPE_CD}"
     echo "  ${DISK_TYPE_DVD}"
+    echo "  ${DISK_TYPE_LD}"
     read -r -p "${DISK_TYPE_CHOICE} " dtype
 
-    if [ "${dtype}" = "2" ]; then
-        subcmd="createdvd"
-    else
-        subcmd="createcd"
-    fi
+    case "${dtype}" in
+        2) subcmd="createdvd" ;;
+        3) subcmd="createld" ;;
+        *) subcmd="createcd" ;;
+    esac
 
     out="${src_dir}${src_name}.chd"
 
@@ -695,6 +696,7 @@ extract_single() {
     echo "  ${OUTPUT_FORMAT_GDI}"
     echo "  ${OUTPUT_FORMAT_ISO}"
     echo "  ${OUTPUT_FORMAT_RAW}"
+    echo "  ${OUTPUT_FORMAT_LD}"
     read -r -p "${OUTPUT_FORMAT_CHOICE} " etype
 
     extra_args=()
@@ -709,6 +711,7 @@ extract_single() {
             [ -z "${unitsize}" ] && unitsize="2048"
             extra_args=(--unitsize "${unitsize}")
             ;;
+        5) subcmd="extractld"; out="${src_dir}${src_name}.avi" ;;
         *) subcmd="extractcd"; out="${src_dir}${src_name}.cue" ;;
     esac
 
@@ -755,6 +758,7 @@ do_extract() {
             out="${f_dir}${f_name}.raw"
             extra_args=(--unitsize "${batch_unitsize}")
             ;;
+        5) subcmd="extractld"; out="${f_dir}${f_name}.avi" ;;
         *) subcmd="extractcd"; out="${f_dir}${f_name}.cue" ;;
     esac
 
@@ -797,6 +801,7 @@ extract_batch() {
     echo "  ${OUTPUT_FORMAT_GDI}"
     echo "  ${OUTPUT_FORMAT_ISO}"
     echo "  ${OUTPUT_FORMAT_RAW}"
+    echo "  ${OUTPUT_FORMAT_LD}"
     read -r -p "${OUTPUT_FORMAT_CHOICE} " etype
 
     batch_unitsize=""
@@ -814,6 +819,7 @@ extract_batch() {
         2) out_ext="gdi" ;;
         3) out_ext="iso" ;;
         4) out_ext="raw" ;;
+        5) out_ext="avi" ;;
         *) out_ext="cue" ;;
     esac
     while IFS= read -r -d '' f; do

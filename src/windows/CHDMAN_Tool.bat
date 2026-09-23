@@ -303,6 +303,7 @@ echo.
 echo %DISK_TYPE_PROMPT%
 echo   %DISK_TYPE_CD%
 echo   %DISK_TYPE_DVD%
+echo   %DISK_TYPE_LD%
 set /p "DTYPE=%DISK_TYPE_CHOICE% "
 
 set "OUT=!SRC_DIR!!SRC_NAME!.chd"
@@ -310,7 +311,11 @@ set "OUT=!SRC_DIR!!SRC_NAME!.chd"
 if "%DTYPE%"=="2" (
     set "SUBCMD=createdvd"
 ) else (
-    set "SUBCMD=createcd"
+    if "%DTYPE%"=="3" (
+        set "SUBCMD=createld"
+    ) else (
+        set "SUBCMD=createcd"
+    )
 )
 
 call :CONFIRM_OVERWRITE "!OUT!"
@@ -510,6 +515,7 @@ echo   %OUTPUT_FORMAT_CUEBIN%
 echo   %OUTPUT_FORMAT_GDI%
 echo   %OUTPUT_FORMAT_ISO%
 echo   %OUTPUT_FORMAT_RAW%
+echo   %OUTPUT_FORMAT_LD%
 set /p "ETYPE=%OUTPUT_FORMAT_CHOICE% "
 
 set "EXTRA_ARGS="
@@ -532,6 +538,10 @@ if "%ETYPE%"=="4" (
     set /p "EXUNITSIZE=%PROMPT_UNITSIZE_EXTRACT% "
     if not defined EXUNITSIZE set "EXUNITSIZE=2048"
     set "EXTRA_ARGS=--unitsize !EXUNITSIZE!"
+)
+if "%ETYPE%"=="5" (
+    set "SUBCMD=extractld"
+    set "OUT=!SRC_DIR!!SRC_NAME!.avi"
 )
 
 call :CONFIRM_OVERWRITE "!OUT!"
@@ -586,6 +596,7 @@ echo   %OUTPUT_FORMAT_CUEBIN%
 echo   %OUTPUT_FORMAT_GDI%
 echo   %OUTPUT_FORMAT_ISO%
 echo   %OUTPUT_FORMAT_RAW%
+echo   %OUTPUT_FORMAT_LD%
 set /p "ETYPE=%OUTPUT_FORMAT_CHOICE% "
 
 REM Compte, sans rien executer, le nombre de fichiers de sortie qui
@@ -598,6 +609,7 @@ set "OUTEXT=cue"
 if "%ETYPE%"=="2" set "OUTEXT=gdi"
 if "%ETYPE%"=="3" set "OUTEXT=iso"
 if "%ETYPE%"=="4" set "OUTEXT=raw"
+if "%ETYPE%"=="5" set "OUTEXT=avi"
 
 set "BATCH_UNITSIZE="
 if "%ETYPE%"=="4" (
@@ -671,6 +683,10 @@ if "%ETYPE2%"=="4" (
     set "SUBCMD=extractraw"
     set "OUT=%FDIR%%FNAME%.raw"
     set "EXTRA_ARGS=--unitsize %BATCH_UNITSIZE2%"
+)
+if "%ETYPE2%"=="5" (
+    set "SUBCMD=extractld"
+    set "OUT=%FDIR%%FNAME%.avi"
 )
 
 echo.

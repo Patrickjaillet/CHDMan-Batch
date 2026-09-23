@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0]
+
+### Added
+- `createld` support, as a third disk type choice under the "create a CHD
+  from one file" menu option, for LaserDisc AVI sources
+- `extractld` support, as a fifth output format choice for both
+  single-file and batch extraction
+
 ## [0.7.0]
 
 ### Added
@@ -142,7 +150,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No automated tests yet
 - Destructive operations (`--force`) run without user confirmation
 
-[Unreleased]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/patrickjaillet/CHDMan-Batch/compare/v0.4.0...v0.5.0
