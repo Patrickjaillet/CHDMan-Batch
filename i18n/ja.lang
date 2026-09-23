@@ -33,10 +33,10 @@ MENU_CHOICE=選択 (1-9) :
 MENU_INVALID=無効な選択です。
 
 ; ==== Common prompts ====
-PROMPT_DROP_FILE_CUE=.cue、.gdi、または .iso ファイルをここにドラッグ&ドロップし、
-PROMPT_DROP_FILE_CHD=.chd ファイルをここにドラッグ&ドロップし、
-PROMPT_DROP_FILE_HD=イメージファイル (.img, .raw, .hdd 等) をここにドラッグ&ドロップし、
-PROMPT_DROP_FOLDER=スキャンするルートフォルダをここにドラッグ&ドロップし、
+PROMPT_DROP_FILE_CUE=.cue、.gdi、または .iso ファイルをここにドラッグ＆ドロップし、
+PROMPT_DROP_FILE_CHD=.chd ファイルをここにドラッグ＆ドロップし、
+PROMPT_DROP_FILE_HD=イメージファイル (.img, .raw, .hdd 等) をここにドラッグ＆ドロップし、
+PROMPT_DROP_FOLDER=スキャンするルートフォルダをここにドラッグ＆ドロップし、
 PROMPT_THEN_ENTER=Enter キーを押してください (またはフルパスを入力してください):
 PROMPT_SOURCE_FILE=ソースファイル:
 PROMPT_SOURCE_FOLDER=ソースフォルダ:
@@ -57,14 +57,14 @@ CREATE_FAILED=[警告] 変換に失敗した可能性があります。
 ; ==== 2) Create - batch ====
 CREATE_BATCH_TITLE=CHD を一括作成
 BATCH_TYPE_PROMPT=処理するディスクの種類:
-BATCH_TYPE_CD=[1] CD のみ  (*.cue, *.gdi)          -> createcd
-BATCH_TYPE_DVD=[2] DVD のみ (*.iso)                 -> createdvd
+BATCH_TYPE_CD=[1] CD のみ  (*.cue, *.gdi)          (createcd)
+BATCH_TYPE_DVD=[2] DVD のみ (*.iso)                 (createdvd)
 BATCH_TYPE_BOTH=[3] 両方 (CUE/GDI は CD、ISO は DVD)
 BATCH_TYPE_CHOICE=選択 (1-3):
 BATCH_DONE=完了しました。変換したファイル数:
 BATCH_FAILURES=失敗:
-BATCH_CD_LABEL=-> CD  :
-BATCH_DVD_LABEL=-> DVD :
+BATCH_CD_LABEL=CD  :
+BATCH_DVD_LABEL=DVD :
 
 ; ==== 3) Extract - single file ====
 EXTRACT_SINGLE_TITLE=CHD を抽出 - 単一ファイル
@@ -80,7 +80,7 @@ EXTRACT_FAILED=[警告] 抽出に失敗した可能性があります。
 EXTRACT_BATCH_TITLE=CHD を一括抽出
 BATCH_OUTPUT_FORMAT_PROMPT=見つかったすべての CHD の出力形式:
 BATCH_DONE_EXTRACT=完了しました。抽出したファイル数:
-BATCH_EXTRACT_LABEL=->
+BATCH_EXTRACT_LABEL=:
 
 ; ==== 5) Verify ====
 VERIFY_TITLE=CHD を検証

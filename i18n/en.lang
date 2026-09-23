@@ -57,14 +57,14 @@ CREATE_FAILED=[WARNING] The conversion appears to have failed.
 ; ==== 2) Create - batch ====
 CREATE_BATCH_TITLE=CREATE CHD FILES IN BATCH
 BATCH_TYPE_PROMPT=Type of disks to process:
-BATCH_TYPE_CD=[1] CD only  (*.cue, *.gdi)          -> createcd
-BATCH_TYPE_DVD=[2] DVD only (*.iso)                 -> createdvd
+BATCH_TYPE_CD=[1] CD only  (*.cue, *.gdi)          (createcd)
+BATCH_TYPE_DVD=[2] DVD only (*.iso)                 (createdvd)
 BATCH_TYPE_BOTH=[3] Both (CUE/GDI as CD, ISO as DVD)
 BATCH_TYPE_CHOICE=Choice (1-3):
 BATCH_DONE=Done. Files converted:
 BATCH_FAILURES=Failures:
-BATCH_CD_LABEL=-> CD  :
-BATCH_DVD_LABEL=-> DVD :
+BATCH_CD_LABEL=CD  :
+BATCH_DVD_LABEL=DVD :
 
 ; ==== 3) Extract - single file ====
 EXTRACT_SINGLE_TITLE=EXTRACT A CHD - Single file
@@ -80,7 +80,7 @@ EXTRACT_FAILED=[WARNING] The extraction appears to have failed.
 EXTRACT_BATCH_TITLE=EXTRACT CHD FILES IN BATCH
 BATCH_OUTPUT_FORMAT_PROMPT=Output format for ALL CHD files found:
 BATCH_DONE_EXTRACT=Done. Files extracted:
-BATCH_EXTRACT_LABEL=->
+BATCH_EXTRACT_LABEL=:
 
 ; ==== 5) Verify ====
 VERIFY_TITLE=VERIFY A CHD

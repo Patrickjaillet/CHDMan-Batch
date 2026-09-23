@@ -20,9 +20,9 @@ No installer. No setup. Extract the archive, run the script for your platform, a
 
 | Platform | Status |
 |---|---|
-| Windows | Available |
-| Linux | Planned |
-| macOS | Planned |
+| Windows (x64) | Available |
+| Linux (x64, arm64) | Available (script and native `chdman` binary embedded; not yet validated on real hardware) |
+| macOS (x64, arm64) | Available (script and native `chdman` binary embedded; not yet validated on real hardware) |
 
 ## Getting started
 
@@ -30,7 +30,7 @@ No installer. No setup. Extract the archive, run the script for your platform, a
 2. Extract the archive anywhere on your system — no installation required
 3. Run the script for your platform:
    - **Windows:** double-click `CHDMAN_Tool.bat`
-   - **Linux / macOS:** run `./chdman-tool.sh` from a terminal (once available — see roadmap)
+   - **Linux / macOS:** run `./chdman-tool.sh` from a terminal
 4. Follow the on-screen menu
 
 The tool ships with its own copy of `chdman`, so nothing else needs to be installed.

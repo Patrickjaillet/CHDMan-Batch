@@ -57,14 +57,14 @@ CREATE_FAILED=[警告] 转换似乎已失败。
 ; ==== 2) Create - batch ====
 CREATE_BATCH_TITLE=批量创建 CHD
 BATCH_TYPE_PROMPT=要处理的光盘类型：
-BATCH_TYPE_CD=[1] 仅 CD  (*.cue, *.gdi)          -> createcd
-BATCH_TYPE_DVD=[2] 仅 DVD (*.iso)                 -> createdvd
+BATCH_TYPE_CD=[1] 仅 CD  (*.cue, *.gdi)          (createcd)
+BATCH_TYPE_DVD=[2] 仅 DVD (*.iso)                 (createdvd)
 BATCH_TYPE_BOTH=[3] 两者都要 (CUE/GDI 作为 CD，ISO 作为 DVD)
 BATCH_TYPE_CHOICE=选择 (1-3)：
 BATCH_DONE=完成。已转换文件数：
 BATCH_FAILURES=失败数：
-BATCH_CD_LABEL=-> CD  :
-BATCH_DVD_LABEL=-> DVD :
+BATCH_CD_LABEL=CD  :
+BATCH_DVD_LABEL=DVD :
 
 ; ==== 3) Extract - single file ====
 EXTRACT_SINGLE_TITLE=提取 CHD - 单个文件
@@ -80,7 +80,7 @@ EXTRACT_FAILED=[警告] 提取似乎已失败。
 EXTRACT_BATCH_TITLE=批量提取 CHD
 BATCH_OUTPUT_FORMAT_PROMPT=所有找到的 CHD 文件的输出格式：
 BATCH_DONE_EXTRACT=完成。已提取文件数：
-BATCH_EXTRACT_LABEL=->
+BATCH_EXTRACT_LABEL=:
 
 ; ==== 5) Verify ====
 VERIFY_TITLE=验证 CHD

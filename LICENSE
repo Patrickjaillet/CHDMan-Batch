@@ -21,12 +21,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ================================================================================
-NOTICE — THIRD-PARTY COMPONENT
+NOTICE — THIRD-PARTY COMPONENTS
 ================================================================================
 
-This distribution includes an unmodified copy of the `chdman` binary
-("chdman.exe" and its equivalents for other platforms), which is part of the
-MAME project and is NOT covered by the MIT License above.
+This distribution includes copies of the `chdman` binary, which is part of
+the MAME project, for several platforms. These binaries are NOT covered by
+the MIT License above.
+
+--------------------------------------------------------------------------------
+1. chdman for Windows (chdman.exe)
+--------------------------------------------------------------------------------
 
   - Component:      chdman (MAME Compressed Hunks of Data manager)
   - Project:        MAME
@@ -36,16 +40,60 @@ MAME project and is NOT covered by the MIT License above.
                      under the 3-Clause BSD License; the project as a whole is
                      distributed under GPL-2.0-or-later)
   - Source & terms: https://github.com/mamedev/mame
-  - Unmodified:      Yes. This project redistributes the official, unmodified
-                     chdman binary as built and released by MAMEdev. No source
-                     code of MAME/chdman is included or modified in this
-                     repository.
+  - Provenance:     Official, unmodified binary built and released by MAMEdev
+                     as part of the mame0289 release. No source code of
+                     MAME/chdman is included or modified in this repository.
+
+--------------------------------------------------------------------------------
+2. chdman for Linux and macOS (x64 and arm64)
+--------------------------------------------------------------------------------
+
+  - Component:      chdman (MAME Compressed Hunks of Data manager), version
+                     0.289.0
+  - Underlying project: MAME (see above; the chdman tool itself is licensed
+                     by MAMEdev under GPL-2.0-or-later)
+  - Provenance:     MAMEdev does not publish official precompiled chdman
+                     binaries for Linux or macOS. These binaries are
+                     unofficial redistributions, recompiled and published by
+                     a third party unaffiliated with MAMEdev:
+                       - Publisher:  Christian Emmer ("emmercm")
+                       - Project:    chdman-js
+                       - Source:     https://github.com/emmercm/chdman-js
+                       - Distributed as: npm packages
+                       @emmercm/chdman-linux-x64, @emmercm/chdman-linux-arm64,
+                       @emmercm/chdman-darwin-x64, @emmercm/chdman-darwin-arm64
+                       (all version 0.289.0)
+                     The chdman-js project itself is published under the GNU
+                     General Public License v3.0 or later (GPL-3.0-or-later);
+                     see https://github.com/emmercm/chdman-js/blob/main/LICENSE
+                     for its full text. Downloaded from the official npm
+                     registry (registry.npmjs.org) and verified against the
+                     SHA-1 checksums published by that registry before being
+                     embedded in this repository — see COMPILATION.md,
+                     section 7.3, for the exact verification procedure
+                     followed.
+
+--------------------------------------------------------------------------------
+3. libSDL3.0.dylib (macOS only, x64 and arm64)
+--------------------------------------------------------------------------------
+
+  - Component:      SDL (Simple DirectMedia Layer), version 3
+  - Copyright:      Sam Lantinga and the SDL contributors
+  - License:        zlib License
+  - Source & terms: https://github.com/libsdl-org/SDL
+  - Role:           Runtime dependency of the macOS `chdman` binary described
+                     above (loaded dynamically via `@executable_path`,
+                     bundled unmodified alongside `chdman` as provided by the
+                     chdman-js project referenced in section 2)
+
+--------------------------------------------------------------------------------
 
 The MIT License terms above apply solely to the original work contained in
 this repository (batch/shell scripts, language files, documentation, and
 build tooling authored for the "CHDman Batch UI" project). They do not apply
-to, and do not relicense, the embedded chdman binary, which remains governed
-by its own GPL-2.0-or-later license as published by MAMEdev.
+to, and do not relicense, any of the third-party components listed above,
+each of which remains governed by its own license as stated.
 
 "MAME" is a registered trademark of Gregory Ember. This project is not
-affiliated with, endorsed by, or sponsored by the MAME development team.
+affiliated with, endorsed by, or sponsored by the MAME development team, nor
+by the chdman-js project or its author.

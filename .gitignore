@@ -11,6 +11,7 @@ COMPILATION.md
 # --- Sorties de build / paquets de distribution ---
 /dist/**
 !/dist/.gitkeep
+*.zip
 
 # --- Fichiers système ---
 Thumbs.db

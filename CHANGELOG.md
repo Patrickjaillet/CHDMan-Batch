@@ -7,6 +7,67 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0]
+
+### Added
+- Native `chdman` 0.289.0 binaries embedded for Linux (x64, arm64) and macOS
+  (x64, arm64), resolving the main blocker of the multi-platform port. No
+  official precompiled `chdman` exists for these platforms from MAMEdev, so
+  these binaries are unofficial redistributions published by a third party
+  (the `chdman-js` project); their provenance, checksums and license are
+  documented in `COMPILATION.md` (section 7) and `LICENSE`
+- `chdman-tool.sh` (Linux and macOS): binary detection now also recognizes
+  the per-architecture `bin/macos/<arch>/chdman` layout required because the
+  macOS binary depends on a bundled `libSDL3.0.dylib`, loaded via
+  `@executable_path`, which is architecture-specific and cannot be shared
+  between x64 and arm64 packages
+
+### Fixed
+- `i18n/*.lang`: several menu strings (`BATCH_TYPE_CD`, `BATCH_TYPE_DVD`,
+  `BATCH_CD_LABEL`, `BATCH_DVD_LABEL`, `BATCH_EXTRACT_LABEL`) contained a
+  literal `->` arrow. In `CHDMAN_Tool.bat`, an unquoted `echo %VAR%` expands
+  the variable before the line is parsed for redirection operators, so the
+  `>` character was interpreted by `cmd.exe` as a redirection instead of
+  being printed, truncating the menu display and creating stray files named
+  `createcd` / `createdvd` in the current directory. Replaced with
+  redirection-safe phrasing (`(createcd)` / `(createdvd)`, plain labels) in
+  all six language files
+- `i18n/ja.lang`: four prompts (`PROMPT_DROP_FILE_CUE`, `PROMPT_DROP_FILE_CHD`,
+  `PROMPT_DROP_FILE_HD`, `PROMPT_DROP_FOLDER`) contained a literal `&`
+  (half-width, from "drag & drop" written in Japanese). For the same
+  unquoted-`echo` reason, `cmd.exe` would treat it as its command-separator
+  operator, cutting the displayed text short and attempting to run the
+  remainder as a command. Replaced with the full-width `＆` character,
+  which is visually equivalent and common in Japanese typography
+
+### Known limitations
+- These native binaries have not been validated by real execution on Linux
+  or macOS hardware yet (only inspected statically: file type, checksum,
+  presence of required subcommands)
+- The Linux binaries are built against musl libc rather than glibc
+
+## [0.3.0]
+
+### Added
+- Linux and macOS support: a single portable `chdman-tool.sh` script
+  (bash >= 3.2 compatible) providing the exact same menu, options and
+  behaviour as the Windows script, fully driven by the same `.lang` files,
+  shipped identically in `src/linux/` and `src/macos/`
+- Automatic detection of the `chdman` binary matching the running OS and
+  CPU architecture (x64 / arm64)
+- `.gitattributes` to enforce consistent line endings across platforms
+  (CRLF for `.bat`, LF for `.sh`, `.lang` and documentation files)
+
+### Known limitations
+- No native `chdman` binary is bundled yet for Linux or macOS: MAME does not
+  publish official precompiled binaries for these platforms (Windows only).
+  `chdman-tool.sh` has been tested with a stub binary that only exercises
+  the menu, i18n and batch-processing logic, not real CHD compression
+- `chdman-tool.sh` has not been tested on an actual macOS system; bash 3.2
+  compatibility has only been verified by static review of the script
+
+## [0.2.0]
+
 ### Added
 - Full internationalization: language files for English (reference), French,
   German, Spanish, Japanese and Chinese (Simplified) in `i18n/*.lang`
@@ -16,13 +77,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New menu option to change the active language at any time
 - `chcp 65001` invoked at startup so multi-byte languages (Japanese, Chinese)
   render correctly in the console
-- Linux and macOS support: a single portable `chdman-tool.sh` script
-  (bash >= 3.2 compatible) providing the exact same menu, options and
-  behaviour as the Windows script, fully driven by the same `.lang` files
-- Automatic detection of the `chdman` binary matching the running OS and
-  CPU architecture (x64 / arm64)
-- `.gitattributes` to enforce consistent line endings across platforms
-  (CRLF for `.bat`, LF for `.sh`, `.lang` and documentation files)
 
 ### Changed
 - `src/windows/CHDMAN_Tool.bat` no longer contains any hard-coded displayed
@@ -33,12 +87,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   9 entries instead of 8)
 
 ### Known limitations
-- No native `chdman` binary is bundled yet for Linux or macOS: MAME does not
-  publish official precompiled binaries for these platforms (Windows only).
-  `chdman-tool.sh` has been tested with a stub binary that only exercises
-  the menu, i18n and batch-processing logic, not real CHD compression
-- `chdman-tool.sh` has not been tested on an actual macOS system; bash 3.2
-  compatibility has only been verified by static review of the script
 - Visual validation of all 6 languages on native Windows, Linux and macOS
   terminals is still pending
 
@@ -62,5 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No automated tests yet
 - Destructive operations (`--force`) run without user confirmation
 
-[Unreleased]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/patrickjaillet/CHDMan-Batch-UI/releases/tag/v0.1.0
