@@ -1,0 +1,127 @@
+name: Validate native chdman binaries
+
+# Ce workflow valide par exécution réelle les binaires chdman natifs
+# embarqués pour Linux et macOS (bin/linux/, bin/macos/), obtenus depuis
+# le paquet npm tiers @emmercm/chdman-* (voir COMPILATION.md section 7 et
+# MEMOIRE.md Entrée 18). Il ne peut pas être exécuté depuis l'environnement
+# de développement Windows/MSYS2 utilisé pour le reste du projet (aucun
+# binaire ELF/Mach-O n'y est exécutable), d'où le recours à des runners
+# GitHub Actions réels.
+#
+# Portée : createhd (accepte n'importe quel fichier binaire arbitraire en
+# entrée, sans nécessiter une structure CUE/BIN ou ISO valide) puis verify
+# et info sur le CHD produit, pour chaque combinaison OS/architecture
+# embarquée. Ceci valide que le binaire s'exécute réellement (y compris,
+# sur macOS, le chargement dynamique de libSDL3.0.dylib via
+# @executable_path) et produit un fichier CHD exploitable — pas
+# l'ensemble des sous-commandes ni le script chdman-tool.sh lui-même.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "bin/linux/**"
+      - "bin/macos/**"
+      - ".github/workflows/validate-native-binaries.yml"
+  pull_request:
+    paths:
+      - "bin/linux/**"
+      - "bin/macos/**"
+      - ".github/workflows/validate-native-binaries.yml"
+  workflow_dispatch: {}
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify architecture reported by the runner
+        run: |
+          echo "uname -m: $(uname -m)"
+
+      - name: Make binary executable
+        run: chmod +x "bin/linux/chdman-${{ matrix.arch }}"
+
+      - name: Report chdman version / help output
+        run: "./bin/linux/chdman-${{ matrix.arch }} | head -20"
+
+      - name: Create a synthetic test image
+        run: |
+          mkdir -p work
+          # Image binaire arbitraire de 4 MiB, structure non significative :
+          # createhd n'exige pas de format de disque particulier en entree.
+          dd if=/dev/urandom of=work/test-image.raw bs=1M count=4
+
+      - name: createhd
+        run: |
+          ./bin/linux/chdman-${{ matrix.arch }} createhd \
+            --force \
+            --input work/test-image.raw \
+            --output work/test-image.chd
+
+      - name: Confirm the CHD file was produced
+        run: test -s work/test-image.chd
+
+      - name: verify
+        run: ./bin/linux/chdman-${{ matrix.arch }} verify --input work/test-image.chd
+
+      - name: info
+        run: ./bin/linux/chdman-${{ matrix.arch }} info --input work/test-image.chd --verbose
+
+  macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13
+            arch: x64
+          - runner: macos-14
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify architecture reported by the runner
+        run: |
+          echo "uname -m: $(uname -m)"
+
+      - name: Make binary executable
+        run: chmod +x "bin/macos/${{ matrix.arch }}/chdman"
+
+      - name: Report chdman version / help output
+        # Execute depuis le dossier contenant libSDL3.0.dylib : le binaire
+        # la charge via le chemin relatif @executable_path/libSDL3.0.dylib,
+        # elle doit donc etre dans le meme dossier que le binaire execute.
+        run: |
+          cd "bin/macos/${{ matrix.arch }}"
+          ./chdman | head -20
+
+      - name: Create a synthetic test image
+        run: |
+          mkdir -p work
+          dd if=/dev/urandom of=work/test-image.raw bs=1m count=4
+
+      - name: createhd
+        run: |
+          ./bin/macos/${{ matrix.arch }}/chdman createhd \
+            --force \
+            --input work/test-image.raw \
+            --output work/test-image.chd
+
+      - name: Confirm the CHD file was produced
+        run: test -s work/test-image.chd
+
+      - name: verify
+        run: ./bin/macos/${{ matrix.arch }}/chdman verify --input work/test-image.chd
+
+      - name: info
+        run: ./bin/macos/${{ matrix.arch }}/chdman info --input work/test-image.chd --verbose
