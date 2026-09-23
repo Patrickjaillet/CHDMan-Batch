@@ -1,0 +1,51 @@
+MIT License
+
+Copyright (c) 2026 Patrick JAILLET
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+NOTICE — THIRD-PARTY COMPONENT
+================================================================================
+
+This distribution includes an unmodified copy of the `chdman` binary
+("chdman.exe" and its equivalents for other platforms), which is part of the
+MAME project and is NOT covered by the MIT License above.
+
+  - Component:      chdman (MAME Compressed Hunks of Data manager)
+  - Project:        MAME
+  - Copyright:      MAMEdev and contributors
+  - License:        GNU General Public License v2.0 or later (GPL-2.0-or-later)
+                     (a majority of individual MAME source files are licensed
+                     under the 3-Clause BSD License; the project as a whole is
+                     distributed under GPL-2.0-or-later)
+  - Source & terms: https://github.com/mamedev/mame
+  - Unmodified:      Yes. This project redistributes the official, unmodified
+                     chdman binary as built and released by MAMEdev. No source
+                     code of MAME/chdman is included or modified in this
+                     repository.
+
+The MIT License terms above apply solely to the original work contained in
+this repository (batch/shell scripts, language files, documentation, and
+build tooling authored for the "CHDman Batch UI" project). They do not apply
+to, and do not relicense, the embedded chdman binary, which remains governed
+by its own GPL-2.0-or-later license as published by MAMEdev.
+
+"MAME" is a registered trademark of Gregory Ember. This project is not
+affiliated with, endorsed by, or sponsored by the MAME development team.

@@ -1,0 +1,33 @@
+# ============================================================
+# CHDman Batch UI — .gitignore
+# ============================================================
+
+# --- Fichiers de travail internes (jamais publiés) ---
+ROADMAP.md
+CLAUDE.md
+MEMOIRE.md
+COMPILATION.md
+
+# --- Sorties de build / paquets de distribution ---
+/dist/**
+!/dist/.gitkeep
+
+# --- Fichiers système ---
+Thumbs.db
+desktop.ini
+.DS_Store
+._*
+
+# --- Éditeurs / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Journaux d'exécution générés par les scripts ---
+*.log
+
+# --- Fichiers de configuration locale générés au runtime ---
+*.local.cfg
+settings.local.*
