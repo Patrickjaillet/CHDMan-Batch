@@ -54,13 +54,6 @@ jobs:
       - name: Report chdman version / help output
         run: "./bin/linux/chdman-${{ matrix.arch }} | head -20"
 
-      - name: DEBUG createld usage
-        if: matrix.arch == 'x64'
-        run: |
-          ./bin/linux/chdman-${{ matrix.arch }} createld || true
-          echo "---extractld---"
-          ./bin/linux/chdman-${{ matrix.arch }} extractld || true
-
       - name: Create a synthetic test image
         run: |
           mkdir -p work
